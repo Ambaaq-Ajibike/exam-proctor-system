@@ -1,0 +1,156 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="~/assets/libs/flatpickr/dist/flatpickr.min.css" />
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Favicon icon-->
+    <link rel="shortcut icon" type="image/x-icon" href="~/assets/images/favicon/favicon.ico" />
+
+    <!-- darkmode js -->
+    <script src="~/assets/js/vendors/darkMode.js"></script>
+
+    <!-- Libs CSS -->
+    <link href="~/assets/fonts/feather/feather.css" rel="stylesheet" />
+    <link href="~/assets/libs/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="~/assets/libs/simplebar/dist/simplebar.min.css" rel="stylesheet" />
+
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="~/assets/css/theme.min.css">
+
+   
+
+    @RenderSection("PageHead", required: false)
+
+    
+    <link rel="canonical" href="admin-dashboard.html" />
+
+    <title>Dashboard | Geeks - Bootstrap 5 Admin Dashboard Template</title>
+</head>
+
+<body>
+    <!-- Wrapper -->
+    <div id="db-wrapper">
+        <!-- navbar vertical -->
+        <!-- Sidebar -->
+        <partial name="_Sidebar" />
+        <!-- Page Content -->
+        <main id="page-content">
+            <div class="header">
+                <!-- navbar -->
+                <nav class="navbar-default navbar navbar-expand-lg">
+                    <a id="nav-toggle" href="admin-dashboard.html#">
+                        <i class="fe fe-menu"></i>
+                    </a>
+                    <div class="ms-lg-3 d-none d-md-none d-lg-block">
+                        <!-- Form -->
+                        <form class="d-flex align-items-center">
+                            <span class="position-absolute ps-3 search-icon">
+                                <i class="fe fe-search"></i>
+                            </span>
+                            <input type="search" class="form-control ps-6" placeholder="Search Entire Dashboard" />
+                        </form>
+                    </div>
+                    <!--Navbar nav -->
+                    <div class="ms-auto d-flex">
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-icon rounded-circle d-flex align-items-center" type="button" aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
+                                <i class="bi theme-icon-active"></i>
+                                <span class="visually-hidden bs-theme-text">Toggle theme</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bs-theme-text">
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
+                                        <i class="bi theme-icon bi-sun-fill"></i>
+                                        <span class="ms-2">Light</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+                                        <i class="bi theme-icon bi-moon-stars-fill"></i>
+                                        <span class="ms-2">Dark</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto" aria-pressed="true">
+                                        <i class="bi theme-icon bi-circle-half"></i>
+                                        <span class="ms-2">Auto</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <ul class="navbar-nav navbar-right-wrap ms-2 d-flex nav-top-wrap">
+
+                            <li class="dropdown ms-2">
+                                <a class="rounded-circle" href="admin-dashboard.html#" role="button" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="avatar avatar-md avatar-indicators avatar-online">
+                                        <img alt="avatar" src="~/assets/images/avatar/avatar-1.jpg" class="rounded-circle" />
+                                    </div>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUser">
+                                    <div class="dropdown-item">
+                                        <div class="d-flex">
+                                            <div class="avatar avatar-md avatar-indicators avatar-online">
+                                                <img alt="avatar" src="~/assets/images/avatar/avatar-1.jpg" class="rounded-circle" />
+                                            </div>
+                                            <div class="ms-3 lh-1">
+                                                <h5 class="mb-1">Annette Black</h5>
+                                                <p class="mb-0">annette@geeksui.com</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                    <ul class="list-unstyled">
+
+                                        <li>
+                                            <a class="dropdown-item" href="../profile-edit.html">
+                                                <i class="fe fe-user me-2"></i>
+                                                Profile
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="dropdown-divider"></div>
+                                    <ul class="list-unstyled">
+                                        <li>
+                                            <a class="dropdown-item" href="~/index.html">
+                                                <i class="fe fe-power me-2"></i>
+                                                Sign Out
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- Page Header -->
+            <!-- Container fluid -->
+            @RenderBody()
+
+        </main>
+    </div>
+
+    <!-- Script -->
+    <!-- Libs JS -->
+    <script src="~/assets/libs/popperjs/core/dist/umd/popper.min.js"></script>
+    <script src="~/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="~/assets/libs/simplebar/dist/simplebar.min.js"></script>
+
+    <!-- Theme JS -->
+    <script src="~/assets/js/theme.min.js"></script>
+
+    <script src="~/assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+    <script src="~/assets/js/vendors/chart.js"></script>
+    <script src="~/assets/libs/flatpickr/dist/flatpickr.min.js"></script>
+    <script src="~/assets/js/vendors/flatpickr.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+
+   
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

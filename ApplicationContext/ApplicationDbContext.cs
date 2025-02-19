@@ -1,0 +1,37 @@
+﻿using exam_proctor_system.Models.Entities;
+using Microsoft.EntityFrameworkCore;
+namespace exam_proctor_system.ApplicationContext
+{
+
+	public class ApplicationDbContext : DbContext
+	{
+		public ApplicationDbContext() { }
+
+		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+
+		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		{
+			optionsBuilder.UseSqlServer("OurConnectionString");
+		}
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+
+			modelBuilder.Entity<User>().HasData(
+				new User
+				{
+					Id = 1,
+					Email = "ajibikeabulqayyum04@gmail.com",
+					Password = "ambaaq",
+					FaceId = "id",
+					Role = Role.Admin
+				});
+		}
+
+		public DbSet<Exam> Exams { get; set; }
+		public DbSet<Question> Questions { get; set; }
+		public DbSet<Option> Options { get; set; }
+		public DbSet<Candidate> Candidates { get; set; }
+		public DbSet<Result> Results { get; set; }
+		public DbSet<User> Users { get; set; }
+	}
+}

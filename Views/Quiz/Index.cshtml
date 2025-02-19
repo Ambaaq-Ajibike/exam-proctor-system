@@ -1,0 +1,447 @@
+﻿@section PageHead {
+    <link rel="canonical" href="student-quiz-start.html" />
+    <link rel="stylesheet" href="~/assets/libs/bs-stepper/dist/css/bs-stepper.min.css" />
+}
+
+<div class="db-content" style="margin-left: 5px;">
+    <div class="container mb-4">
+        <div class="row mb-6">
+            <div class="col-12">
+                <div class="d-flex flex-row align-items-center justify-content-between">
+                    <h1 class="h2 mb-0">Quizzes</h1>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex flex-row align-items-center justify-content-between mb-4">
+                    <h2 class="mb-0">React Quiz</h2>
+
+                    <a href="student-quiz-start.html#!" class="btn btn-dark">Stop Quiz</a>
+                </div>
+                <div id="courseForm" class="bs-stepper">
+                    <!-- Stepper Button -->
+                    <!-- Stepper content -->
+                    <div class="bs-stepper-content">
+                        <div role="tablist">
+                            <div class="step" data-target="#test-l-1">
+                                <div class="step-trigger visually-hidden" role="tab" id="courseFormtrigger1" aria-controls="test-l-1"></div>
+                            </div>
+
+                            <div class="step" data-target="#test-l-2">
+                                <button type="button" class="step-trigger visually-hidden" role="tab" id="courseFormtrigger2" aria-controls="test-l-2"></button>
+                            </div>
+
+                            <div class="step" data-target="#test-l-3">
+                                <button type="button" class="step-trigger visually-hidden" role="tab" id="courseFormtrigger3" aria-controls="test-l-3"></button>
+                            </div>
+
+                            <div class="step" data-target="#test-l-4">
+                                <button type="button" class="step-trigger visually-hidden" role="tab" id="courseFormtrigger4" aria-controls="test-l-4"></button>
+                            </div>
+                            <div class="step" data-target="#test-l-5">
+                                <button type="button" class="step-trigger visually-hidden" role="tab" id="courseFormtrigger5" aria-controls="test-l-5"></button>
+                            </div>
+                        </div>
+                        <form onSubmit="return false">
+                            <!-- Content one -->
+                            <div id="test-l-1" role="tabpanel" class="bs-stepper-pane fade">
+                                <div class="card">
+                                    <!-- Card body -->
+                                    <div class="card-body d-flex flex-column gap-5">
+                                        <!-- quiz -->
+                                        <div class="d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 gap-md-0">
+                                            <h3 class="mb-0"><a href="student-quiz-start.html#" class="text-inherit">React State Management</a></h3>
+                                            <div>
+                                                <span class="text-danger">
+                                                    <i class="fe fe-clock me-1 align-middle"></i>
+                                                    00:05:55
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-column gap-2">
+                                            <!-- text -->
+                                            <div class="d-flex justify-content-between">
+                                                <span>Exam Progress:</span>
+                                                <span>Question 1 out of 5</span>
+                                            </div>
+                                            <!-- progress bar -->
+                                            <div class="">
+                                                <div class="progress" style="height: 6px">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- text -->
+                                        <div class="d-flex flex-column gap-4">
+                                            <div class="d-flex flex-column gap-1">
+                                                <span class="fw-semibold text-secondary">Question 1</span>
+                                                <h3 class="mb-0">React is mainly used for building ___.</h3>
+                                            </div>
+                                            <div class="d-flex flex-column gap-4">
+                                                <!-- list group -->
+                                                <div class="list-group">
+                                                    <div class="list-group-item list-group-item-action" aria-current="true">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" />
+                                                            <label class="form-check-label stretched-link" for="flexRadioDefault1">Database</label>
+                                                        </div>
+                                                    </div>
+                                                    <!-- list group -->
+                                                    <div class="list-group-item list-group-item-action">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" />
+                                                            <label class="form-check-label stretched-link" for="flexRadioDefault2">Connectivity</label>
+                                                        </div>
+                                                    </div>
+                                                    <!-- list group -->
+                                                    <div class="list-group-item list-group-item-action">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3" />
+                                                            <label class="form-check-label stretched-link" for="flexRadioDefault3">User interface</label>
+                                                        </div>
+                                                    </div>
+                                                    <!-- list group -->
+                                                    <div class="list-group-item list-group-item-action">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault4" />
+                                                            <label class="form-check-label stretched-link" for="flexRadioDefault4">Design Platform</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Button -->
+                                                <div class="d-flex justify-content-end">
+                                                    <button class="btn btn-primary" onclick="courseForm.next()">
+                                                        Next
+                                                        <i class="fe fe-arrow-right"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Content two -->
+                            <div id="test-l-2" role="tabpanel" class="bs-stepper-pane fade" aria-labelledby="courseFormtrigger2">
+                                <div class="card">
+                                    <!-- Card body -->
+                                    <div class="card-body d-flex flex-column gap-5">
+                                        <!-- quiz -->
+                                        <div class="d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 gap-md-0">
+                                            <h3 class="mb-0"><a href="student-quiz-start.html#" class="text-inherit">React State Management</a></h3>
+                                            <div>
+                                                <span class="text-danger">
+                                                    <i class="fe fe-clock me-1 align-middle"></i>
+                                                    00:04:35
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-column gap-2">
+                                            <!-- text -->
+                                            <div class="d-flex justify-content-between">
+                                                <span>Exam Progress:</span>
+                                                <span>Question 2 out of 5</span>
+                                            </div>
+                                            <!-- progress bar -->
+                                            <div class="">
+                                                <div class="progress" style="height: 6px">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 20%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- text -->
+                                        <div class="d-flex flex-column gap-4">
+                                            <div class="d-flex flex-column gap-1">
+                                                <span class="fw-semibold text-secondary">Question 2</span>
+                                                <h3 class="mb-0">The lifecycle methods are mainly used for ___.</h3>
+                                            </div>
+                                            <div class="d-flex flex-column gap-4">
+                                                <!-- list group -->
+                                                <div class="list-group">
+                                                    <div class="list-group-item list-group-item-action" aria-current="true">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault5" />
+                                                            <label class="form-check-label stretched-link" for="flexRadioDefault5">keeping track of event history</label>
+                                                        </div>
+                                                    </div>
+                                                    <!-- list group -->
+                                                    <div class="list-group-item list-group-item-action">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault7" />
+                                                            <label class="form-check-label stretched-link" for="flexRadioDefault7">enhancing components</label>
+                                                        </div>
+                                                    </div>
+                                                    <!-- list group -->
+                                                    <div class="list-group-item list-group-item-action">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault8" />
+                                                            <label class="form-check-label stretched-link" for="flexRadioDefault8">freeing up resources</label>
+                                                        </div>
+                                                    </div>
+                                                    <!-- list group -->
+                                                    <div class="list-group-item list-group-item-action">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault9" />
+                                                            <label class="form-check-label stretched-link" for="flexRadioDefault9">none of the above</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Button -->
+                                                <div class="d-flex justify-content-between">
+                                                    <button class="btn btn-secondary" onclick="courseForm.previous()">
+                                                        <i class="fe fe-arrow-left"></i>
+                                                        Previous
+                                                    </button>
+                                                    <button class="btn btn-primary" onclick="courseForm.next()">
+                                                        Next
+                                                        <i class="fe fe-arrow-right"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Content three -->
+                            <div id="test-l-3" role="tabpanel" class="bs-stepper-pane fade" aria-labelledby="courseFormtrigger3">
+                                <div class="card">
+                                    <!-- Card body -->
+                                    <div class="card-body d-flex flex-column gap-5">
+                                        <!-- quiz -->
+                                        <div class="d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 gap-md-0">
+                                            <h3 class="mb-0"><a href="student-quiz-start.html#" class="text-inherit">React State Management</a></h3>
+                                            <div>
+                                                <span class="text-danger">
+                                                    <i class="fe fe-clock me-1 align-middle"></i>
+                                                    00:05:45
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-column gap-2">
+                                            <!-- text -->
+                                            <div class="d-flex justify-content-between">
+                                                <span>Exam Progress:</span>
+                                                <span>Question 3 out of 5</span>
+                                            </div>
+                                            <!-- progress bar -->
+                                            <div class="">
+                                                <div class="progress" style="height: 6px">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 75%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- text -->
+                                        <div class="d-flex flex-column gap-4">
+                                            <div class="d-flex flex-column gap-1">
+                                                <span class="fw-semibold text-secondary">Question 3</span>
+                                                <h3 class="mb-3">___ can be done while multiple elements need to be returned from a component.</h3>
+                                            </div>
+                                            <div class="d-flex flex-column gap-4">
+                                                <div>
+                                                    <!-- buttons -->
+                                                    <div class="d-grid mb-2" role="group" aria-label="Basic radio toggle button group">
+                                                        <input type="radio" class="btn-check" name="btnradio" id="btnradio1" checked="" />
+                                                        <label class="btn btn-outline-secondary text-start" for="btnradio1">Abstraction</label>
+                                                    </div>
+                                                    <!-- buttons -->
+                                                    <div class="d-grid mb-2">
+                                                        <input type="radio" class="btn-check" name="btnradio" id="btnradio2" />
+                                                        <label class="btn btn-outline-secondary text-start" for="btnradio2">Packing</label>
+                                                    </div>
+                                                    <!-- buttons -->
+                                                    <div class="d-grid mb-2">
+                                                        <input type="radio" class="btn-check" name="btnradio" id="btnradio3" />
+                                                        <label class="btn btn-outline-secondary text-start" for="btnradio3">Insulation</label>
+                                                    </div>
+                                                    <!-- buttons -->
+                                                    <div class="d-grid mb-2">
+                                                        <input type="radio" class="btn-check" name="btnradio" id="btnradio4" />
+                                                        <label class="btn btn-outline-secondary text-start" for="btnradio4">Wrapping</label>
+                                                    </div>
+                                                </div>
+                                                <!-- Button -->
+                                                <div class="d-flex justify-content-between">
+                                                    <button class="btn btn-secondary" onclick="courseForm.previous()">
+                                                        <i class="fe fe-arrow-left"></i>
+                                                        Previous
+                                                    </button>
+                                                    <button class="btn btn-primary" onclick="courseForm.next()">
+                                                        Next
+                                                        <i class="fe fe-arrow-right"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Content four -->
+                            <div id="test-l-4" role="tabpanel" class="bs-stepper-pane fade" aria-labelledby="courseFormtrigger4">
+                                <div class="card">
+                                    <!-- Card body -->
+                                    <div class="card-body d-flex flex-column gap-5">
+                                        <!-- quiz -->
+                                        <div class="d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 gap-md-0">
+                                            <h3 class="mb-0"><a href="student-quiz-start.html#" class="text-inherit">React State Management</a></h3>
+                                            <div>
+                                                <span class="text-danger">
+                                                    <i class="fe fe-clock me-1 align-middle"></i>
+                                                    00:05:45
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-column gap-2">
+                                            <!-- text -->
+                                            <div class="d-flex justify-content-between">
+                                                <span>Exam Progress:</span>
+                                                <span>Question 4 out of 5</span>
+                                            </div>
+                                            <!-- progress bar -->
+                                            <div class="">
+                                                <div class="progress" style="height: 6px">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 85%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- text -->
+                                        <div class="d-flex flex-column gap-4">
+                                            <div class="d-flex flex-column gap-1">
+                                                <span class="fw-semibold text-secondary">Question 4</span>
+                                                <h3 class="mb-0">What’s the difference between a 301 and a 302 redirect?</h3>
+                                            </div>
+                                            <div class="d-flex flex-column gap-4">
+                                                <!-- list group -->
+                                                <div class="list-group">
+                                                    <div class="list-group-item list-group-item-action" aria-current="true">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="flexCheckboxDefault" id="flexCheckboxDefault5" checked="" />
+                                                            <label class="form-check-label stretched-link" for="flexCheckboxDefault5">301 is used for a temporary page redirection, 302 for a redirection block</label>
+                                                        </div>
+                                                    </div>
+                                                    <!-- list group -->
+                                                    <div class="list-group-item list-group-item-action">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="flexCheckboxDefault" id="flexCheckboxDefault6" />
+                                                            <label class="form-check-label stretched-link" for="flexCheckboxDefault6">301 is used for a permanent page redirection, 302 for a temporary redirection</label>
+                                                        </div>
+                                                    </div>
+                                                    <!-- list group -->
+                                                    <div class="list-group-item list-group-item-action">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="flexCheckboxDefault" id="flexCheckboxDefault7" />
+                                                            <label class="form-check-label stretched-link" for="flexCheckboxDefault7">301 is used for a page redirection block, 302 for a permanent redirection</label>
+                                                        </div>
+                                                    </div>
+                                                    <!-- list group -->
+                                                    <div class="list-group-item list-group-item-action">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="flexCheckboxDefault" id="flexCheckboxDefault8" />
+                                                            <label class="form-check-label stretched-link" for="flexCheckboxDefault8">301 is used for a temporary page redirection, 302 for a permanent redirection</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Button -->
+                                                <!-- Button -->
+                                                <div class="d-flex justify-content-between">
+                                                    <button class="btn btn-secondary" onclick="courseForm.previous()">
+                                                        <i class="fe fe-arrow-left"></i>
+                                                        Previous
+                                                    </button>
+                                                    <button class="btn btn-primary" onclick="courseForm.next()">
+                                                        Next
+                                                        <i class="fe fe-arrow-right"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="test-l-5" role="tabpanel" class="bs-stepper-pane fade" aria-labelledby="courseFormtrigger5">
+                                <div class="card">
+                                    <!-- Card body -->
+                                    <div class="card-body d-flex flex-column gap-5">
+                                        <!-- quiz -->
+                                        <div class="d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 gap-md-0">
+                                            <h3 class="mb-0"><a href="student-quiz-start.html#" class="text-inherit">React State Management</a></h3>
+                                            <div>
+                                                <span class="text-danger">
+                                                    <i class="fe fe-clock me-1 align-middle"></i>
+                                                    00:04:30
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-column gap-2">
+                                            <!-- text -->
+                                            <div class="d-flex justify-content-between">
+                                                <span>Exam Progress:</span>
+                                                <span>Question 5 out of 5</span>
+                                            </div>
+                                            <!-- progress bar -->
+                                            <div class="">
+                                                <div class="progress" style="height: 6px">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 75%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- text -->
+                                        <div class="d-flex flex-column gap-4">
+                                            <div class="d-flex flex-column gap-1">
+                                                <span class="fw-semibold text-secondary">Question 5</span>
+                                                <h3 class="mb-3">Is React a programming language?</h3>
+                                            </div>
+                                            <div class="d-flex flex-column gap-4">
+                                                <div class="list-group">
+                                                    <div class="list-group-item list-group-item-action" aria-current="true">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault10" />
+                                                            <label class="form-check-label stretched-link" for="flexRadioDefault10">Yes</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="list-group-item list-group-item-action" aria-current="true">
+                                                        <!-- form check -->
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault11" />
+                                                            <label class="form-check-label stretched-link" for="flexRadioDefault11">No</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Button -->
+                                                <div class="d-flex justify-content-between">
+                                                    <button class="btn btn-secondary" onclick="courseForm.previous()">
+                                                        <i class="fe fe-arrow-left"></i>
+                                                        Previous
+                                                    </button>
+                                                    <button type="submit" class="btn btn-primary" onclick=" location.href='student-quiz-result.html' ">Finish</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/assets/libs/bs-stepper/dist/js/bs-stepper.min.js"></script>
+    <script src="~/assets/js/vendors/beStepper.js"></script>
+    <script src="~/assets/js/vendors/navbar-nav.js"></script>
+}
