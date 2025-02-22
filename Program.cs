@@ -1,4 +1,7 @@
 using exam_proctor_system.ApplicationContext;
+using exam_proctor_system.Repositories;
+using exam_proctor_system.Services.Implementations;
+using exam_proctor_system.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +18,9 @@ if (string.IsNullOrEmpty(connectionString))
 }
 
 Console.WriteLine($"Using Connection String: {connectionString}"); // Debugging output
+
+builder.Services.AddScoped<IExamService, ExamService>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 	options.UseSqlServer(connectionString));

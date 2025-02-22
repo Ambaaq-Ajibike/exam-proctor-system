@@ -1,4 +1,5 @@
-﻿@section PageHead {
+﻿@using exam_proctor_system.Models.DTos.ResponseModel
+@section PageHead {
     <link rel="canonical" href="project-grid.html" />
     <link href="~/assets/libs/dropzone/dist/dropzone.css" rel="stylesheet " />
 
@@ -1285,20 +1286,20 @@
         <!-- card body -->
         <div class="container">
             <!-- form -->
-            <form class="row needs-validation" novalidate>
+            <form class="row needs-validation" asp-action="Create" enctype="multipart/form-data">
                 <!-- form group -->
                 <div class="mb-3 col-12">
                     <label class="form-label" for="projectTitle">
-                        Exam Title
+                        Exam Name
                         <span class="text-danger">*</span>
                     </label>
-                    <input type="text" class="form-control" id="projectTitle" placeholder="Enter project title" required />
-                    <div class="invalid-feedback">Please enter project title</div>
+                    <input type="text" class="form-control" id="projectTitle" name="name" placeholder="Enter exam name" required />
+                    <div class="invalid-feedback">Please enter exam name</div>
                 </div>
                 <!-- form group -->
                 <div class="mb-3 col-12">
                     <label class="form-label" for="description">Description</label>
-                    <textarea class="form-control" id="description" placeholder="Enter brief about project..." rows="3" required></textarea>
+                    <textarea class="form-control" name="description" id="description" placeholder="Enter brief about exam..." rows="3" required></textarea>
                     <div class="invalid-feedback">Please enter project description</div>
                 </div>
                 <!-- form group -->
@@ -1308,7 +1309,7 @@
                         <span class="text-danger">*</span>
                     </label>
                     <div class="input-group me-3">
-                        <input class="form-control flatpickr" type="text" placeholder="Select Date" aria-describedby="basic-addon2 " />
+                        <input class="form-control flatpickr" name="startTime" type="text" placeholder="Select Date" aria-describedby="basic-addon2 " />
 
                         <span class="input-group-text" id="basic-addon2"><i class="fe fe-calendar"></i></span>
                     </div>
@@ -1320,20 +1321,57 @@
                         <span class="text-danger">*</span>
                     </label>
                     <div class="input-group me-3">
-                        <input class="form-control flatpickr" type="text" placeholder="Select Date" aria-describedby="basic-addon3 " />
+                        <input class="form-control flatpickr" type="text" name="endTime" placeholder="Select Date" aria-describedby="basic-addon3 " />
 
                         <span class="input-group-text" id="basic-addon3"><i class="fe fe-calendar"></i></span>
                     </div>
                 </div>
+               <!-- form group -->
+                <div class="mb-3 col-md-6 col-12">
+                    <label class="form-label">
+                        Duration
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group me-3">
+                        <input class="form-control" name="duration" type="number"  aria-describedby="basic-addon2 " />
+                    </div>
+                </div>
+                <!-- form group -->
+                <div class="mb-3 col-md-6 col-12">
+                    <label class="form-label">
+                        Total Score
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group me-3">
+                        <input class="form-control" type="number" name="totalScore" aria-describedby="basic-addon3 " />
+                    </div>
+                </div>
+               <div class="mb-3 col-md-6 col-12">
+                    <label class="form-label">
+                        Number of Questions
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group me-3">
+                        <input class="form-control" type="number" name="numberOfQuestions" aria-describedby="basic-addon3 " />
+                    </div>
+                </div>
                
-                <div class="col-md-3 col-12 mb-4">
+                <div class="mb-3 col-md-6 col-12">
                     <div>
                         <!-- logo -->
                         <h5 class="mb-3">Exam Questions</h5>
                         <div class="icon-shape icon-xxl border rounded position-relative">
                             <span class="position-absolute"><i class="bi bi-image fs-3"></i></span>
-                            <input class="form-control border-0 opacity-0" type="file " />
+                            <input class="form-control border-0 opacity-0" name="questions" accept=".csv, .xlsx" type="file" />
                         </div>
+                    </div>
+                </div>
+                <div class="mb-3 col-md-6 col-12">
+                    <div>
+                        <a class="btn btn-primary" asp-action="QuestionTemplateDownload"
+                           class="btn btn-info">
+                            Download Template
+                        </a>
                     </div>
                 </div>
                 <div class="col-md-8"></div>
@@ -1346,7 +1384,19 @@
         </div>
     </div>
 </div>
-
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <img src="..." class="rounded me-2" alt="...">
+            <strong class="me-auto">Bootstrap</strong>
+            <small>11 mins ago</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            @TempData["CreateExamResponseMessage"]
+        </div>
+    </div>
+</div>
 @section Scripts{
     <script src="~/assets/libs/dropzone/dist/min/dropzone.min.js"></script>
     <script src="~/assets/libs/tippy.js/dist/tippy-bundle.umd.min.js"></script>
@@ -1354,6 +1404,16 @@
     <script src="~/assets/js/vendors/dropzone.js"></script>
     <script src="~/assets/js/vendors/validation.js"></script>
     <script src="~/assets/libs/choices.js/public/assets/scripts/choices.min.js"></script>
-
     <script src="~/assets/js/vendors/choice.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toastLiveExample = document.getElementById("liveToast");
+
+            // Ensure toast exists and message is not null/empty
+            if (toastLiveExample && "@TempData["CreateExamResponseMessage"]" !== "") {
+                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
+                toastBootstrap.show();
+            }
+        });
+    </script>
 }

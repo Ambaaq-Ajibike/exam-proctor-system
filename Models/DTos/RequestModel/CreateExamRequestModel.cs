@@ -1,6 +1,6 @@
-﻿namespace exam_proctor_system.Models.Entities
+﻿namespace exam_proctor_system.Models.DTos.RequestModel
 {
-	public class Exam : BaseEntity
+	public class CreateExamRequestModel
 	{
 		public string Name { get; set; }
 		public string Description { get; set; }
@@ -9,6 +9,6 @@
 		public int Duration { get; set; }
 		public int TotalScore { get; set; }
 		public string NumberOfQuestions { get; set; }
-		List<Question> Questions { get; set; }	
+		public IFormFile Questions { get; set; }
 	}
 }
