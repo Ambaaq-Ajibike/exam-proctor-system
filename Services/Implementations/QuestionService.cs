@@ -1,4 +1,5 @@
-﻿using exam_proctor_system.Models.DTos.ResponseModel;
+﻿using exam_proctor_system.Models.DTos.RequestModel;
+using exam_proctor_system.Models.DTos.ResponseModel;
 using exam_proctor_system.Models.Entities;
 using exam_proctor_system.Repositories;
 using exam_proctor_system.Services.Interfaces;
@@ -46,6 +47,7 @@ namespace exam_proctor_system.Services.Implementations
 			{
 				Data = new QuizModel
 				{
+					ExamId = exam.Id,
 					ExamName = exam.Name,
 					Questions = questionModels,
 					Duration = exam.Duration
@@ -60,12 +62,14 @@ namespace exam_proctor_system.Services.Implementations
 			List<Question> shuffedQuestions = [];
 			for (int i = 0; i < number; i++)
 			{
-				var randomValue = rnd.Next(0, questions.Count - 1);
+				var randomValue = rnd.Next(0, questions.Count);
 				var question = questions[randomValue];
 
 				shuffedQuestions.Add(question);
 			}
 			return shuffedQuestions;
 		}
+
+	
 	}
 }

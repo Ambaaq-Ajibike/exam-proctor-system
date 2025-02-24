@@ -9,8 +9,9 @@ namespace exam_proctor_system.Models.DTos.ResponseModel
 	}
 	public class QuizModel
 	{
+		public Guid ExamId { get; set; }
 		public string ExamName { get; set; }
-		public IEnumerable<QuestionModel> Questions { get; set; }
+		public List<QuestionModel> Questions { get; set; } = [];
 		public int Duration { get; set; }
 	}
 }

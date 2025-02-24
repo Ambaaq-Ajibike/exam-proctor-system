@@ -1,5 +1,8 @@
 ﻿@using exam_proctor_system.Models.DTos.ResponseModel
 @model BaseResponse<QuizModel>
+@{
+    int num = 0;
+}
 @section PageHead {
     <link rel="canonical" href="student-quiz-start.html" />
     <link rel="stylesheet" href="~/assets/libs/bs-stepper/dist/css/bs-stepper.min.css" />
@@ -18,83 +21,97 @@
             <div class="col-12">
                 <div class="d-flex flex-row align-items-center justify-content-between mb-4">
                     <h2 class="mb-0">@Model.Data.ExamName</h2>
-                    <a href="student-quiz-start.html#!" class="btn btn-dark">Stop Quiz</a>
+
+                    <p class="btn btn-dark"><span id="timer">00:00:00</span></p>
                 </div>
                 <div id="courseForm" class="bs-stepper">
                     <!-- Stepper Button -->
                     <!-- Stepper content -->
                     <div class="bs-stepper-content">
                         <div role="tablist">
-                            @for (int i = 0; i < Model.Data.Questions.Count(); i++)
+                             @for (int i = 1; i <= Model.Data.Questions.Count(); i++)
                             {
-                                <div class="step" data-target="#test-l-@(i + 1)">
-                                    <button type="button" class="step-trigger visually-hidden" role="tab" id="courseFormtrigger@(i + 1)" aria-controls="test-l-@(i + 1)"></button>
+                                <div class="step" data-target="#test-l-@i">
+                                    <div class="step-trigger visually-hidden" role="tab" id="courseFormtrigger@(i)" aria-controls="test-l-@i"></div>
                                 </div>
                             }
+                            
                         </div>
-                        <form onSubmit="return false">
-                            @foreach (var question in Model.Data.Questions.Select((value, index) => new { value, index }))
+                        <form asp-action="Result">
+                            <input type="hidden" name="ExamId" value="@Model.Data.ExamId" />
+                            @for (int i = 0; i < Model.Data.Questions.Count(); i++)
                             {
-                                <div id="test-l-@(question.index + 1)" role="tabpanel" class="bs-stepper-pane fade">
+                                
+                                <div id="test-l-@(i+1)" role="tabpanel" class="bs-stepper-pane fade" aria-labelledby="courseFormtrigger@(i+1)">
                                     <div class="card">
+                                        <!-- Card body -->
                                         <div class="card-body d-flex flex-column gap-5">
-                                            <!-- Quiz Header -->
+                                            <!-- quiz -->
                                             <div class="d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 gap-md-0">
                                                 <h3 class="mb-0"><a href="student-quiz-start.html#" class="text-inherit">@Model.Data.ExamName</a></h3>
                                                 <div>
-                                                    <span class="text-danger">
-                                                        <i class="fe fe-clock me-1 align-middle"></i>
-                                                        <span id="timer">00:00:00</span>
-                                                    </span>
+                                                    @* <span class="text-danger"> *@
+                                                    @*     <i class="fe fe-clock me-1 align-middle"></i> *@
+                                                    @*     <span id="timer">00:00:00</span> *@
+
+                                                    @* </span> *@
                                                 </div>
                                             </div>
-                                            <!-- Progress Bar -->
                                             <div class="d-flex flex-column gap-2">
+                                                <!-- text -->
                                                 <div class="d-flex justify-content-between">
                                                     <span>Exam Progress:</span>
-                                                    <span>Question @(question.index + 1) out of @Model.Data.Questions.Count()</span>
+                                                    <span>Question @(i + 1) out of @Model.Data.Questions.Count()</span>
                                                 </div>
-                                                <div class="progress" style="height: 6px">
-                                                    <div class="progress-bar bg-success" role="progressbar" style="width: @((question.index + 1) * 100 / Model.Data.Questions.Count())%" aria-valuenow="@((question.index + 1) * 100 / Model.Data.Questions.Count())" aria-valuemin="0" aria-valuemax="100"></div>
+                                                <!-- progress bar -->
+                                                <div class="">
+                                                    <div class="progress" style="height: 6px">
+                                                        <div class="progress-bar bg-success" role="progressbar" style="width: @((i + 1) * 100 / Model.Data.Questions.Count())%" aria-valuenow="@((i + 1) * 100 / Model.Data.Questions.Count())" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+
                                                 </div>
                                             </div>
-                                            <!-- Question and Options -->
+                                            <!-- text -->
                                             <div class="d-flex flex-column gap-4">
                                                 <div class="d-flex flex-column gap-1">
-                                                    <span class="fw-semibold text-secondary">Question @(question.index + 1)</span>
-                                                    <h3 class="mb-0">@question.value.QuestionText</h3>
+                                                    <span class="fw-semibold text-secondary">Question @(i + 1)</span>
+                                                    <h3 class="mb-0">@Model.Data.Questions[i].QuestionText</h3>
                                                 </div>
                                                 <div class="d-flex flex-column gap-4">
+                                                    <!-- list group -->
                                                     <div class="list-group">
-                                                        @foreach (var option in question.value.Options)
+                                                        @for (int j = 0; j < Model.Data.Questions[i].Options.Count; j++)
                                                         {
-                                                            <div class="list-group-item list-group-item-action">
+                                                            num = num + 1;
+                                                            <div class="list-group-item list-group-item-action" aria-current="true">
+                                                                <!-- form check -->
                                                                 <div class="form-check">
-                                                                    <input class="form-check-input" type="radio" name="question@(question.index + 1)" id="option@(option.Id)" value="@option.Id" />
-                                                                    <label class="form-check-label stretched-link" for="option@(option.Id)">@option.OptionText</label>
+                                                                    <input class="form-check-input" type="radio" name="SelectedOptions[@i].OptionId" id="flexRadioDefault@(num)" value="@Model.Data.Questions[i].Options[j].Id" />
+                                                                    <label class="form-check-label stretched-link" for="flexRadioDefault@(num)">@Model.Data.Questions[i].Options[j].OptionText</label>
                                                                 </div>
                                                             </div>
                                                         }
                                                     </div>
-                                                    <!-- Navigation Buttons -->
+                                                    <!-- Button -->
                                                     <div class="d-flex justify-content-between">
-                                                        @if (question.index > 0)
+                                                        @if (i != 0)
                                                         {
-                                                            <button class="btn btn-secondary" onclick="courseForm.previous()">
+                                                            <button type="button" class="btn btn-secondary" onclick="courseForm.previous()">
                                                                 <i class="fe fe-arrow-left"></i>
                                                                 Previous
                                                             </button>
                                                         }
-                                                        @if (question.index < Model.Data.Questions.Count() - 1)
+
+                                                        @if (i == Model.Data.Questions.Count - 1)
                                                         {
-                                                            <button class="btn btn-primary" onclick="courseForm.next()">
-                                                                Next
-                                                                <i class="fe fe-arrow-right"></i>
-                                                            </button>
+                                                            <button type="submit" class="btn btn-primary">Finish</button>
                                                         }
                                                         else
                                                         {
-                                                            <button type="submit" class="btn btn-primary" onclick="location.href='student-quiz-result.html'">Finish</button>
+                                                            <button type="button" class="btn btn-primary" onclick="courseForm.next()">
+                                                                Next
+                                                                <i class="fe fe-arrow-right"></i>
+                                                            </button>
                                                         }
                                                     </div>
                                                 </div>
@@ -102,6 +119,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                             }
                         </form>
                     </div>
@@ -137,4 +155,5 @@
 
         const timerInterval = setInterval(updateTimer, 1000);
     </script>
+
 }
