@@ -6,9 +6,10 @@ namespace exam_proctor_system.Controllers
 {
 	public class ExamsController(IExamService _examService, IWebHostEnvironment _hostenv) : Controller
 	{
-		public IActionResult Index()
+		public async Task<IActionResult> Index()
 		{
-			return View();
+			var exams = await _examService.GetExamsAsync();
+			return View(exams);
 		}
 		[HttpPost]
 		public async Task<IActionResult> Create([FromForm]CreateExamRequestModel createExamRequest)

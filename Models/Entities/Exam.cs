@@ -8,7 +8,7 @@
 		public DateTime EndTime { get; set; }
 		public int Duration { get; set; }
 		public int TotalScore { get; set; }
-		public string NumberOfQuestions { get; set; }
+		public int NumberOfQuestions { get; set; }
 		List<Question> Questions { get; set; }	
 	}
 }

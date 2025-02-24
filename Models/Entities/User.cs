@@ -6,6 +6,7 @@
 		public string Password { get; set; }
 		public string FaceId { get; set; }
 		public Role Role { get; set; }
+		public Candidate Candidate { get; set; }
 	}
 	public enum Role
 	{

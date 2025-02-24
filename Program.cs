@@ -3,27 +3,23 @@ using exam_proctor_system.Repositories;
 using exam_proctor_system.Services.Implementations;
 using exam_proctor_system.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<ApplicationDbContext>(
+		options => options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection")));
+
 builder.Services.AddControllersWithViews();
 
 
-var connectionString = builder.Configuration.GetConnectionString("ProctorDB");
 
-if (string.IsNullOrEmpty(connectionString))
-{
-	throw new InvalidOperationException("Database connection string is missing.");
-}
-
-Console.WriteLine($"Using Connection String: {connectionString}"); // Debugging output
-
-builder.Services.AddScoped<IExamService, ExamService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IExamService, ExamService>();
+builder.Services.AddScoped<IQuestionService, QuestionService>();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-	options.UseSqlServer(connectionString));
+
 
 var app = builder.Build();
 

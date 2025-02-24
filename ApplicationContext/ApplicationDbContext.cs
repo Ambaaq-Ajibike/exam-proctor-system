@@ -3,23 +3,15 @@ using Microsoft.EntityFrameworkCore;
 namespace exam_proctor_system.ApplicationContext
 {
 
-	public class ApplicationDbContext : DbContext
+	public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
 	{
-		public ApplicationDbContext() { }
 
-		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-		{
-			optionsBuilder.UseSqlServer("OurConnectionString");
-		}
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 
 			modelBuilder.Entity<User>().HasData(
 				new User
 				{
-					Id = 1,
 					Email = "ajibikeabulqayyum04@gmail.com",
 					Password = "ambaaq",
 					FaceId = "id",

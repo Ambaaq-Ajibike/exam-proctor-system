@@ -12,39 +12,49 @@ using exam_proctor_system.ApplicationContext;
 namespace exam_proctor_system.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250222163115_ExamInQuestion")]
-    partial class ExamInQuestion
+    [Migration("20250223055503_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.13")
+                .HasAnnotation("ProductVersion", "8.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("exam_proctor_system.Models.Entities.Candidate", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Candidates");
                 });
 
             modelBuilder.Entity("exam_proctor_system.Models.Entities.Exam", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -77,11 +87,9 @@ namespace exam_proctor_system.Migrations
 
             modelBuilder.Entity("exam_proctor_system.Models.Entities.Option", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("bit");
@@ -90,8 +98,8 @@ namespace exam_proctor_system.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -102,14 +110,12 @@ namespace exam_proctor_system.Migrations
 
             modelBuilder.Entity("exam_proctor_system.Models.Entities.Question", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ExamId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ExamId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("QuestionText")
                         .IsRequired()
@@ -124,14 +130,12 @@ namespace exam_proctor_system.Migrations
 
             modelBuilder.Entity("exam_proctor_system.Models.Entities.Result", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CandidateId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("CandidateId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("Score")
                         .HasColumnType("float");
@@ -145,11 +149,9 @@ namespace exam_proctor_system.Migrations
 
             modelBuilder.Entity("exam_proctor_system.Models.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -173,12 +175,23 @@ namespace exam_proctor_system.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = new Guid("eef9a9b3-2e2a-4558-90e5-d44fe7289d68"),
                             Email = "ajibikeabulqayyum04@gmail.com",
                             FaceId = "id",
                             Password = "ambaaq",
                             Role = 0
                         });
+                });
+
+            modelBuilder.Entity("exam_proctor_system.Models.Entities.Candidate", b =>
+                {
+                    b.HasOne("exam_proctor_system.Models.Entities.User", "User")
+                        .WithOne("Candidate")
+                        .HasForeignKey("exam_proctor_system.Models.Entities.Candidate", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("exam_proctor_system.Models.Entities.Option", b =>
@@ -217,6 +230,12 @@ namespace exam_proctor_system.Migrations
             modelBuilder.Entity("exam_proctor_system.Models.Entities.Question", b =>
                 {
                     b.Navigation("Options");
+                });
+
+            modelBuilder.Entity("exam_proctor_system.Models.Entities.User", b =>
+                {
+                    b.Navigation("Candidate")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

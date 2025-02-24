@@ -10,4 +10,14 @@
 		public int TotalScore { get; set; }
 		public string NumberOfQuestions { get; set; }
 	}
+	public class ExamResponseModel
+	{
+		public Guid Id { get; set; }
+		public string Name { get; set; }
+		public string Description { get; set; }
+		public string StartTime { get; set; }
+		public string EndTime { get; set; }
+		public string Status { get; set; }
+		public int Progress { get; set; }
+	}
 }

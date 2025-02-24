@@ -11,7 +11,34 @@ namespace exam_proctor_system.Services.Implementations
 	{
 		public async Task<BaseResponse<ExamModel>> CreateExamAsync(CreateExamRequestModel request)
 		{
+			var examExists = await _examRepository.FindAsync(e => e.Name == request.Name);
+			if (examExists != null)
+			{
+				return new BaseResponse<ExamModel>
+				{
+					IsSuccess = false,
+					Message = "Exam with the same name already exists"
+				};
+			}
+			else if (request.StartTime < DateTime.Now)
+			{
+				return new BaseResponse<ExamModel>
+				{
+					IsSuccess = false,
+					Message = "Start time cannot be in the past"
+				};
+			}
+			else if (request.EndTime < request.StartTime)
+			{ 
+				return new BaseResponse<ExamModel>
+				{
+					IsSuccess = false,
+					Message = "End time cannot be before start time"
+				};
+			}
+
 			var exam = request.Adapt<Exam>();
+
 			await _examRepository.AddAsync(exam);
 			var (success, message) = await ProcessQuestions(request.Questions, exam.Id);
 			if (!success)
@@ -30,7 +57,7 @@ namespace exam_proctor_system.Services.Implementations
 				Data = exam.Adapt<ExamModel>()
 			};
 		}
-		private async Task<(bool, string)> ProcessQuestions(IFormFile file, int examId)
+		private async Task<(bool, string)> ProcessQuestions(IFormFile file, Guid examId)
 		{
 			ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 			using (var package = new ExcelPackage(file.OpenReadStream()))
@@ -86,9 +113,22 @@ namespace exam_proctor_system.Services.Implementations
 			throw new NotImplementedException();
 		}
 
-		public Task<BaseResponse<IEnumerable<ExamModel>>> GetExamsAsync()
+		public async Task<IEnumerable<ExamResponseModel>> GetExamsAsync()
 		{
-			throw new NotImplementedException();
+			var exams = await _examRepository.GetAllAsync(e => true);
+			var now = DateTime.Now;
+			var examsResponse = exams.Select(e => new ExamResponseModel
+			{
+				Id = e.Id,
+				Name = e.Name,
+				StartTime = e.StartTime.ToString("d MMM, yyyy h:mm tt"),
+				EndTime = e.EndTime.ToString("d MMM, yyyy h:mm tt"),
+				Status = e.StartTime < DateTime.Now && e.EndTime > DateTime.Now ? "Active" : "Inactive",
+				Progress = e.StartTime > now ? 0 : // Exam not started
+			  e.EndTime <= now ? 100 : // Exam ended
+			  (int)(((now - e.StartTime).TotalMinutes / (e.EndTime - e.StartTime).TotalMinutes) * 100)
+			});
+			return examsResponse;
 		}
 
 		public Task<BaseResponse<ExamModel>> UpdateExamAsync(int id, CreateExamRequestModel request)
