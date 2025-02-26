@@ -24,6 +24,7 @@ namespace exam_proctor_system.Services.Implementations
 				IsSuccess = true,
 				Data = new LoginResponse
 				{
+					UserId = user.Id,
 					Username = user.Email,
 					Role = user.Role
 				}

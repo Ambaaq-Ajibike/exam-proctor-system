@@ -6,5 +6,6 @@
 		public string LastName { get; set; }
 		public User User { get; set; }
 		public Guid UserId { get; set; }
+		public List<CandidateExam> CandidateExams { get; set; } = [];
 	}
 }

@@ -7,7 +7,7 @@ using Mapster;
 using OfficeOpenXml;
 namespace exam_proctor_system.Services.Implementations
 {
-	public class ExamService(IRepository<Exam> _examRepository, IRepository<Question> _questionRepository) : IExamService
+	public class ExamService(IRepository<Exam> _examRepository, IRepository<Question> _questionRepository, IRepository<Candidate> _candidateRepository, ICandidateExamRepository _candidateExamRepository) : IExamService
 	{
 		public async Task<BaseResponse<ExamModel>> CreateExamAsync(CreateExamRequestModel request)
 		{
@@ -134,6 +134,24 @@ namespace exam_proctor_system.Services.Implementations
 		public Task<BaseResponse<ExamModel>> UpdateExamAsync(int id, CreateExamRequestModel request)
 		{
 			throw new NotImplementedException();
+		}
+
+		public async Task<IEnumerable<ExamResponseModel>> GetCandidateExams(Guid candidateId)
+		{
+			var now = DateTime.Now;
+			var exams = await _candidateExamRepository.GetAllAsync(e => e.CandidateId == candidateId || e.Candidate.UserId == candidateId);
+			return exams.Select(e => new ExamResponseModel
+			{
+				Id = e.ExamId,
+				Name = e.Exam.Name,
+				StartTime = e.Exam.StartTime.ToString("d MMM, yyyy h:mm tt"),
+				EndTime = e.Exam.EndTime.ToString("d MMM, yyyy h:mm tt"),
+				Status = e.Exam.StartTime < DateTime.Now && e.Exam.EndTime > DateTime.Now ? "Active" : "Inactive",
+				Progress = e.Exam.StartTime > now ? 0 : // Exam not started
+			  e.Exam.EndTime <= now ? 100 : // Exam ended
+			  (int)(((now - e.Exam.StartTime).TotalMinutes / (e.Exam.EndTime - e.Exam.StartTime).TotalMinutes) * 100),
+			  Duration = e.Exam.Duration,
+			});
 		}
 	}
 }

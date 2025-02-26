@@ -25,5 +25,6 @@ namespace exam_proctor_system.ApplicationContext
 		public DbSet<Candidate> Candidates { get; set; }
 		public DbSet<Result> Results { get; set; }
 		public DbSet<User> Users { get; set; }
+		public DbSet<CandidateExam> CandidateExams { get; set; }
 	}
 }

@@ -1,4 +1,7 @@
-﻿<nav class="navbar-vertical navbar">
+﻿@inject IHttpContextAccessor HttpContextAccessor
+
+@using exam_proctor_system.Models.Entities
+<nav class="navbar-vertical navbar">
     <div class="vh-100" data-simplebar>
         <!-- Brand logo -->
         <a class="navbar-brand" asp-action="Index">
@@ -6,26 +9,38 @@
         </a>
         <!-- Navbar nav -->
         <ul class="navbar-nav flex-column" id="sideNavbar">
-            <li class="nav-item">
-                <a class="nav-link"
-                   asp-controller="Home" asp-action="Dashboard">
-                    <i class="nav-icon fe fe-home me-2"></i>
-                    Dashboard
-                </a>
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == Role.Admin.ToString())
+            {
+                <li class="nav-item">
 
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="Exam" asp-action="Index">
-                    <i class="nav-icon fe fe-book me-2"></i>
-                    Exams
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="Quiz" asp-action="Index" asp-route-examId="eaeb3d66-a284-42b1-8c7b-23314d1b04ea">
-                    <i class="nav-icon fe fe-book me-2"></i>
-                    Quiz
-                </a>
-            </li>
+                    <a class="nav-link"
+                       asp-controller="Home" asp-action="Dashboard">
+                        <i class="nav-icon fe fe-home me-2"></i>
+                        Dashboard
+                    </a>
+
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Exam" asp-action="Index">
+                        <i class="nav-icon fe fe-book me-2"></i>
+                        Exams
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Candidates" asp-action="Index">
+                        <i class="nav-icon fe fe-book me-2"></i>
+                        Candidates
+                    </a>
+                </li>
+            }
+            else{
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Candidates" asp-action="Exams" asp-route-candidateId="@HttpContextAccessor.HttpContext.Session.GetString("UserId")">
+                        <i class="nav-icon fe fe-book me-2"></i>
+                        Exams
+                    </a>
+                </li>
+            }
         </ul>
     </div>
 </nav>

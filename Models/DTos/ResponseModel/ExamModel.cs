@@ -18,6 +18,7 @@
 		public string StartTime { get; set; }
 		public string EndTime { get; set; }
 		public string Status { get; set; }
+		public int Duration { get; set; }
 		public int Progress { get; set; }
 	}
 }

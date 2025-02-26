@@ -21,6 +21,7 @@ namespace exam_proctor_system.Controllers
 				TempData["LoginMessage"] = response.Message;
 				return View();
 			}
+			HttpContext.Session.SetString("UserId", response.Data.UserId.ToString());
 			HttpContext.Session.SetString("Username", response.Data.Username);
 			HttpContext.Session.SetString("Role", response.Data.Role.ToString());
 			if (response.Data.Role == Models.Entities.Role.Admin)
@@ -29,7 +30,8 @@ namespace exam_proctor_system.Controllers
 			}
 			else
 			{
-				return RedirectToAction("Index", "Exam");
+				return RedirectToAction("Exams", "Candidates", new { candidateId = response.Data.UserId });
+
 			}
 
 		}

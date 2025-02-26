@@ -1,0 +1,162 @@
+﻿@using exam_proctor_system.Models.DTos.ResponseModel
+@model IEnumerable<CandidateModel>
+
+<section class="container-fluid p-4">
+    <div class="row">
+        <!-- Page Header -->
+        <div class="col-lg-12 col-md-12 col-12">
+            <div class="border-bottom pb-3 mb-3 d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between">
+                <div class="d-flex flex-column gap-1">
+                    <h1 class="mb-0 h2 fw-bold">Candidates</h1>
+                </div>
+                <div>
+                    <a href="admin-course-category.html#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newCatgory">
+                        Add New
+                        Candidate
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-12">
+            <!-- Card -->
+            <div class="card mb-4">
+                <!-- Card header -->
+                <div class="card-header border-bottom-0">
+                    <!-- Form -->
+                    <form class="d-flex align-items-center">
+                        <span class="position-absolute ps-3 search-icon">
+                            <i class="fe fe-search"></i>
+                        </span>
+                        <input type="search" class="form-control ps-6" placeholder="Search Candidate" />
+                    </form>
+                </div>
+                <!-- Table -->
+                <div class="table-responsive border-0 overflow-y-hidden">
+                    <table class="table mb-0 text-nowrap table-centered table-hover table-with-checkbox">
+                        <thead class="table-light">
+                            <tr>
+                               
+                                <th>#</th>
+                                <th>First name</th>
+                                <th>Last name</th>
+                                <th>Email</th>
+                                <th>Pin</th>
+                                <th>Exams</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var candidate in Model){
+                                <tr class="accordion-toggle collapsed" id="accordion1" data-bs-toggle="collapse"
+                                    data-bs-parent="#accordion1" data-bs-target="#collapseOne">
+                                    <td>@candidate.Id</td>
+                                    <td>@candidate.LastName</td>
+                                    <td>@candidate.FirstName</td>
+                                    <td>@candidate.Email</td>
+                                    <td>@candidate.Pin</td>
+                                    <td>@candidate.Exams</td>
+
+                                    <td>
+                                        <span class="dropdown dropstart">
+                                            <a class="btn-icon btn btn-ghost btn-sm rounded-circle" href="admin-course-category.html#" role="button"
+                                               id="courseDropdown1" data-bs-toggle="dropdown" data-bs-offset="-20,20"
+                                               aria-expanded="false">
+                                                <i class="fe fe-more-vertical"></i>
+                                            </a>
+                                            <span class="dropdown-menu" aria-labelledby="courseDropdown1">
+                                                <span class="dropdown-header">Action</span>
+                                                <a class="dropdown-item" href="admin-course-category.html#">
+                                                    <i class="fe fe-send dropdown-item-icon"></i>
+                                                    Edit
+                                                </a>
+                                                <a class="dropdown-item" href="admin-course-category.html#">
+                                                    <i class="fe fe-trash dropdown-item-icon"></i>
+                                                    Delete
+                                                </a>
+                                            </span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                           
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="modal fade" id="newCatgory" tabindex="-1" role="dialog" aria-labelledby="newCatgoryLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title mb-0" id="newCatgoryLabel">Add New Candidate</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="needs-validation row" asp-action="Create">
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label">
+                            First name
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group me-3">
+                            <input class="form-control" type="text" name="firstName" placeholder="Candidate's first name" aria-describedby="basic-addon3" />
+                        </div>
+                    </div>
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label">
+                            Last name
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group me-3">
+                            <input class="form-control" type="text" name="lastName" placeholder="Candidate's last name" aria-describedby="basic-addon3" />
+                        </div>
+                    </div>
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label">
+                            Email
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group me-3">
+                            <input class="form-control" type="text" name="email" placeholder="Candidate's email" aria-describedby="basic-addon3" />
+                        </div>
+                    </div>
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label">
+                            Pin
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group me-3">
+                            <input class="form-control" type="text" name="pin" placeholder="Candidate's pin" aria-describedby="basic-addon3" />
+                        </div>
+                    </div>
+                    <div class="mb-3 mb-2">
+                        <label class="form-label" for="parent">Exams</label>
+                        <select class="form-select" multiple data-choices="" id="parent" required name="examIds">
+                            @foreach(var exam in ViewBag.Exams){
+                                <option value="@exam.Id">@exam.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/assets/libs/quill/dist/quill.js"></script>
+    <script src="~/assets/js/vendors/editor.js"></script>
+    <script src="~/assets/js/vendors/validation.js"></script>
+    <script src="~/assets/libs/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <script src="~/assets/js/vendors/choice.js"></script>
+}
