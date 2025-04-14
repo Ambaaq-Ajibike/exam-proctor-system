@@ -30,7 +30,7 @@ namespace exam_proctor_system.Controllers
 			}
 			else
 			{
-				return RedirectToAction("Exams", "Candidates", new { candidateId = response.Data.UserId });
+				return RedirectToAction("Exams", "Candidates", new { userId = response.Data.UserId });
 
 			}
 

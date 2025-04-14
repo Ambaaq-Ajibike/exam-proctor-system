@@ -5,6 +5,6 @@ namespace exam_proctor_system.Services.Interfaces
 {
 	public interface IResultService
 	{
-		Task<ResultResponse> CalculateResult(GradeRequest gradeRequest);
+		Task<BaseResponse<ResultResponse>> CalculateResult(GradeRequest gradeRequest);
 	}
 }

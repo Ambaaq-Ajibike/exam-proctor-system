@@ -298,18 +298,6 @@
         </div>
     </div>
 </div>
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">Secure exam</strong>
-            <small>11 mins ago</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-            @TempData["CreateExamResponseMessage"]
-        </div>
-    </div>
-</div>
 @section Scripts{
     <script src="~/assets/libs/dropzone/dist/min/dropzone.min.js"></script>
     <script src="~/assets/libs/tippy.js/dist/tippy-bundle.umd.min.js"></script>
@@ -326,14 +314,6 @@
                 time_24hr: true // Optional: Forces 24-hour format
             });
         });
-        document.addEventListener("DOMContentLoaded", function () {
-            const toastLiveExample = document.getElementById("liveToast");
-
-            // Ensure toast exists and message is not null/empty
-            if (toastLiveExample && "@TempData["CreateExamResponseMessage"]" !== "") {
-                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
-                toastBootstrap.show();
-            }
-        });
+        
     </script>
 }

@@ -15,8 +15,8 @@ namespace exam_proctor_system.Controllers
 		public async Task<IActionResult> Create([FromForm]CreateExamRequestModel createExamRequest)
 		{
 			var response = await _examService.CreateExamAsync(createExamRequest);
-			TempData["CreateExamResponseMessage"] = response.Message;
-			return View("Index");
+			TempData["ResponseMessage"] = response.Message;
+			return RedirectToAction("Index");
 		}
 
 		[HttpGet]

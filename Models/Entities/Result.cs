@@ -4,6 +4,7 @@
 	{
 		public Candidate Candidate { get; set; }
 		public Guid CandidateId { get; set; }
+		public Guid ExamId { get; set; }
 		public double Score { get; set; }
 		public double TotalScore { get; set; }
 		public double Percentage { get; set; }

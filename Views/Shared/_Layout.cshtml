@@ -1,4 +1,8 @@
 ﻿@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var message = TempData["ResponseMessage"];
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+}
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,7 +18,7 @@
     <script src="~/assets/js/vendors/darkMode.js"></script>
 
     <!-- Libs CSS -->
-    <link href="~/assets/fonts/feather/feather.css" rel="stylesheet" />
+    <link href="~/assets/fonts/feather/feather.css" />
     <link href="~/assets/libs/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="~/assets/libs/simplebar/dist/simplebar.min.css" rel="stylesheet" />
 
@@ -28,7 +32,7 @@
     
     <link rel="canonical" href="admin-dashboard.html" />
 
-    <title>Dashboard | Geeks - Bootstrap 5 Admin Dashboard Template</title>
+    <title>Dashboard | SecureExam - Excellent Exam Proctor</title>
 </head>
 
 <body>
@@ -36,24 +40,18 @@
     <div id="db-wrapper">
         <!-- navbar vertical -->
         <!-- Sidebar -->
-        <partial name="_Sidebar" />
+        @if (controller != "Quiz")
+        {
+            <partial name="_Sidebar" />
+        }
         <!-- Page Content -->
-        <main id="page-content">
+        <main id="page-content" style="margin-left: @(controller == "Quiz" ? "0": "")">
             <div class="header">
                 <!-- navbar -->
                 <nav class="navbar-default navbar navbar-expand-lg">
-                    <a id="nav-toggle" href="admin-dashboard.html#">
+                    <a id="nav-toggle" href="#">
                         <i class="fe fe-menu"></i>
                     </a>
-                    <div class="ms-lg-3 d-none d-md-none d-lg-block">
-                        <!-- Form -->
-                        <form class="d-flex align-items-center">
-                            <span class="position-absolute ps-3 search-icon">
-                                <i class="fe fe-search"></i>
-                            </span>
-                            <input type="search" class="form-control ps-6" placeholder="Search Entire Dashboard" />
-                        </form>
-                    </div>
                     <!--Navbar nav -->
                     <div class="ms-auto d-flex">
                         <div class="dropdown">
@@ -132,6 +130,18 @@
             <!-- Container fluid -->
             @RenderBody()
 
+            <div class="toast-container position-fixed top-0 end-0 p-3">
+                <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <strong class="me-auto">Secure exam</strong>
+                        <small>11 mins ago</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        @message
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -150,7 +160,17 @@
     <script src="~/assets/js/vendors/flatpickr.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toastLiveExample = document.getElementById("liveToast");
+            const message = @Html.Raw(Json.Serialize(message)); // Safely serialize
 
+            if (toastLiveExample && message !== "") {
+                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
+                toastBootstrap.show();
+            }
+        });
+    </script>
    
     @await RenderSectionAsync("Scripts", required: false)
 </body>

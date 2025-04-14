@@ -38,7 +38,6 @@
                         <thead class="table-light">
                             <tr>
                                
-                                <th>#</th>
                                 <th>First name</th>
                                 <th>Last name</th>
                                 <th>Email</th>
@@ -51,7 +50,6 @@
                             @foreach(var candidate in Model){
                                 <tr class="accordion-toggle collapsed" id="accordion1" data-bs-toggle="collapse"
                                     data-bs-parent="#accordion1" data-bs-target="#collapseOne">
-                                    <td>@candidate.Id</td>
                                     <td>@candidate.LastName</td>
                                     <td>@candidate.FirstName</td>
                                     <td>@candidate.Email</td>
@@ -126,18 +124,10 @@
                         </div>
                     </div>
                     <div class="mb-3 col-md-6 col-12">
-                        <label class="form-label">
-                            Pin
-                            <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group me-3">
-                            <input class="form-control" type="text" name="pin" placeholder="Candidate's pin" aria-describedby="basic-addon3" />
-                        </div>
-                    </div>
-                    <div class="mb-3 mb-2">
                         <label class="form-label" for="parent">Exams</label>
                         <select class="form-select" multiple data-choices="" id="parent" required name="examIds">
-                            @foreach(var exam in ViewBag.Exams){
+                            @foreach (var exam in ViewBag.Exams)
+                            {
                                 <option value="@exam.Id">@exam.Name</option>
                             }
                         </select>

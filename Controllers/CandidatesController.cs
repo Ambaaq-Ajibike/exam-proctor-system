@@ -14,9 +14,9 @@ namespace exam_proctor_system.Controllers
 			return View(candidates);
 		}
 
-		public async Task<IActionResult> Exams(Guid candidateId)
+		public async Task<IActionResult> Exams(Guid userId)
 		{
-			var exams = await _examService.GetCandidateExams(candidateId);
+			var exams = await _examService.GetCandidateExamsByUserId(userId);
 			return View(exams);
 		}
 
@@ -24,11 +24,7 @@ namespace exam_proctor_system.Controllers
 		public async Task<IActionResult> Create(CreateCandidateRequest request)
 		{
 			var response = await _candidateService.CreateCandidateAsync(request);
-			if (!response.IsSuccess)
-			{
-				TempData["Message"] = response.Message;
-				return View();
-			}
+			TempData["ResponseMessage"] = response.Message;
 			return RedirectToAction("Index");
 		}
 	}

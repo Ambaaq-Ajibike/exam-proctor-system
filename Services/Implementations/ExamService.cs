@@ -7,7 +7,7 @@ using Mapster;
 using OfficeOpenXml;
 namespace exam_proctor_system.Services.Implementations
 {
-	public class ExamService(IRepository<Exam> _examRepository, IRepository<Question> _questionRepository, IRepository<Candidate> _candidateRepository, ICandidateExamRepository _candidateExamRepository) : IExamService
+	public class ExamService(IRepository<Exam> _examRepository, IRepository<Question> _questionRepository, IRepository<Candidate> _candidateRepository, ICandidateExamRepository _candidateExamRepository, IRepository<Result> _resultRepository) : IExamService
 	{
 		public async Task<BaseResponse<ExamModel>> CreateExamAsync(CreateExamRequestModel request)
 		{
@@ -136,22 +136,39 @@ namespace exam_proctor_system.Services.Implementations
 			throw new NotImplementedException();
 		}
 
-		public async Task<IEnumerable<ExamResponseModel>> GetCandidateExams(Guid candidateId)
+		public async Task<IEnumerable<ExamResponseModel>> GetCandidateExamsByUserId(Guid userId)
 		{
+			var candidate = await _candidateRepository.FindAsync(x => x.UserId == userId);
+			if (candidate is null)
+			{
+				return [];
+			}
+
 			var now = DateTime.Now;
-			var exams = await _candidateExamRepository.GetAllAsync(e => e.CandidateId == candidateId || e.Candidate.UserId == candidateId);
-			return exams.Select(e => new ExamResponseModel
+
+			var candidateResults = await _resultRepository.GetAllAsync(e => e.CandidateId == candidate.Id);
+			var completedExamIds = candidateResults.Select(x => x.ExamId).ToHashSet();
+
+			var allCandidateExams = await _candidateExamRepository.GetAllAsync(e =>
+				e.CandidateId == candidate.Id);
+
+			var pendingExams = allCandidateExams
+				.Where(e => e.Exam.StartTime < now && !completedExamIds.Contains(e.ExamId))
+				.ToList();
+
+			return pendingExams.Select(e => new ExamResponseModel
 			{
 				Id = e.ExamId,
 				Name = e.Exam.Name,
 				StartTime = e.Exam.StartTime.ToString("d MMM, yyyy h:mm tt"),
 				EndTime = e.Exam.EndTime.ToString("d MMM, yyyy h:mm tt"),
-				Status = e.Exam.StartTime < DateTime.Now && e.Exam.EndTime > DateTime.Now ? "Active" : "Inactive",
-				Progress = e.Exam.StartTime > now ? 0 : // Exam not started
-			  e.Exam.EndTime <= now ? 100 : // Exam ended
-			  (int)(((now - e.Exam.StartTime).TotalMinutes / (e.Exam.EndTime - e.Exam.StartTime).TotalMinutes) * 100),
-			  Duration = e.Exam.Duration,
+				Status = e.Exam.StartTime < now && e.Exam.EndTime > now ? "Active" : "Inactive",
+				Progress = e.Exam.StartTime > now ? 0 :
+						   e.Exam.EndTime <= now ? 100 :
+						   (int)(((now - e.Exam.StartTime).TotalMinutes / (e.Exam.EndTime - e.Exam.StartTime).TotalMinutes) * 100),
+				Duration = e.Exam.Duration,
 			});
 		}
+
 	}
 }

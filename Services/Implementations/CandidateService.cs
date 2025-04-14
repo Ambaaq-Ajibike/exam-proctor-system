@@ -6,10 +6,21 @@ using exam_proctor_system.Services.Interfaces;
 
 namespace exam_proctor_system.Services.Implementations
 {
-	public class CandidateService(IRepository<CandidateExam> _repository, IRepository<Candidate> _candidateRepository,  ICandidateExamRepository _candidateExamRepository, IRepository<Exam> _examRepository) : ICandidateService
+	public class CandidateService(IRepository<CandidateExam> _repository, IRepository<Candidate> _candidateRepository,  ICandidateExamRepository _candidateExamRepository, IRepository<Exam> _examRepository, IEmailService _emailService) : ICandidateService
 	{
 		public async Task<BaseResponse<CandidateModel>> CreateCandidateAsync(CreateCandidateRequest request)
 		{
+			var random = new Random();
+			var pin = random.Next(1000, 9999);
+			var existingExam = await _candidateExamRepository.FindAsync(x => x.ExamId == request.ExamIds.FirstOrDefault() && x.Candidate.User.Email == request.Email);
+			if (existingExam != null)
+			{
+				return new BaseResponse<CandidateModel>
+				{
+					IsSuccess = false,
+					Message = "Candidate already exists for this exam"
+				};
+			}
 			var candidate = new Candidate
 			{
 				FirstName = request.FirstName,
@@ -17,12 +28,13 @@ namespace exam_proctor_system.Services.Implementations
 				User = new User
 				{
 					Email = request.Email,
-					Password = request.Pin,
+					Password = $"{pin}",
 					Role = Role.Candidate,
 					FaceId = "empty"
 				}
 			};
 			await _candidateRepository.AddAsync(candidate);
+			var exams = new List<Exam>();
 			foreach (var item in request.ExamIds)
 			{
 				var exam = await _examRepository.FindAsync(x => x.Id == item);
@@ -36,16 +48,21 @@ namespace exam_proctor_system.Services.Implementations
 					ExamId = exam.Id,
 					Candidate = candidate,
 				};
+				exams.Add(exam);
 				await _repository.AddAsync(candidateExam);
 			}
 			await _repository.SaveChangesAsync();
+			var name = $"{request.FirstName} {request.LastName}";
+			var htmlContent = _emailService.BuildVerificationPasscodeEmail($"{pin}", name, exams);
+			var subject = "SecureExam";
+			await _emailService.SendEmailAsync(request.Email, name, subject, htmlContent);	
 			return new BaseResponse<CandidateModel>
 			{
 				IsSuccess = true,
 				Message = "Candidate created successfully"
 			};
 		}
-
+		
 		public Task<BaseResponse<CandidateModel>> DeleteCandidateAsync(Guid id)
 		{
 			throw new NotImplementedException();
