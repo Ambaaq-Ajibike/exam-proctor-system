@@ -68,29 +68,31 @@
                                             </a>
                                             <div class="dropdown-menu" aria-labelledby="dropdownProjectOne">
                                                 <span class="dropdown-header">Settings</span>
-                                                <a class="dropdown-item" href="project-grid.html#">
+                                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editExamModal"
+                                                   data-id="@exam.Id"
+                                                   data-name="@exam.Name"
+                                                   data-description="@exam.Description"
+                                                   data-start="@exam.StartTime"
+                                                   data-end="@exam.EndTime"
+                                                   data-duration="@exam.Duration"
+                                                   data-numberOfQuestions="@exam.NumberOfQuestions"
+                                                   data-totalScore="@exam.TotalScore"
+                                                   >
                                                     <i class="fe fe-edit dropdown-item-icon"></i>
                                                     Edit Details
                                                 </a>
 
-                                                <a class="dropdown-item" href="project-grid.html#">
-                                                    <i class="fe fe-link dropdown-item-icon"></i>
-                                                    Copy exam link
-                                                </a>
+
                                                 <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item" href="project-grid.html#">
-                                                    <i class="fe fe-upload dropdown-item-icon"></i>
-                                                    Download Questions
-                                                </a>
+                                                @* <a class="dropdown-item" href="project-grid.html#"> *@
+                                                @*     <i class="fe fe-upload dropdown-item-icon"></i> *@
+                                                @*     Download Questions *@
+                                                @* </a> *@
                                                 <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item" href="project-grid.html#">
-                                                    <i class="fe fe-archive dropdown-item-icon"></i>
-                                                    Archive
-                                                </a>
-                                                <a class="dropdown-item" href="project-grid.html#">
-                                                    <i class="fe fe-trash dropdown-item-icon"></i>
-                                                    Delete Project
-                                                </a>
+                                                @* <a class="dropdown-item" href="project-grid.html#"> *@
+                                                @*     <i class="fe fe-trash dropdown-item-icon"></i> *@
+                                                @*     Delete Project *@
+                                                @* </a> *@
                                             </div>
                                         </div>
                                     </div>
@@ -298,6 +300,87 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Exam Modal -->
+<div class="modal fade" id="editExamModal" tabindex="-1" aria-labelledby="editExamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <form method="post" asp-action="Update" id="editExamForm" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editExamModalLabel">Edit Exam</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body row g-3">
+                    <input type="hidden" name="id" id="editExamId" />
+                    <div class="col-12">
+                        <label class="form-label">Exam Name</label>
+                        <input type="text" class="form-control" name="name" id="editExamName" required />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" id="editExamDescription" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <label class="form-label">Start Date & Time</label>
+                        <input class="form-control flatpickr" name="startTime" id="editStartTime" type="text" />
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <label class="form-label">End Date & Time</label>
+                        <input class="form-control flatpickr" name="endTime" id="editEndTime" type="text" />
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <label class="form-label">Duration (in minutes)</label>
+                        <input class="form-control" name="duration" id="editDuration" type="number" />
+                    </div>
+
+                    <!-- form group -->
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label">
+                            Total Score
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group me-3">
+                            <input class="form-control" type="number" name="totalScore" id="editTotalScore" aria-describedby="basic-addon3 " />
+                        </div>
+                    </div>
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label">
+                            Number of Questions
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group me-3">
+                            <input class="form-control" type="number" name="numberOfQuestions" id="editNumberOfQuestions" aria-describedby="basic-addon3 " />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 col-md-6 col-12">
+                        <div>
+                            <h5 class="mb-3">Exam Questions</h5>
+                            <div class="icon-shape icon-xxl border rounded position-relative">
+                                <span class="position-absolute"><i class="bi bi-image fs-3"></i></span>
+                                <input class="form-control border-0 opacity-0" name="questions" accept=".csv, .xlsx" type="file" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 col-md-6 col-12">
+                        <div>
+                            <a class="btn btn-primary" asp-action="QuestionTemplateDownload"
+                               class="btn btn-info">
+                                Download Template
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Update Exam</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 @section Scripts{
     <script src="~/assets/libs/dropzone/dist/min/dropzone.min.js"></script>
     <script src="~/assets/libs/tippy.js/dist/tippy-bundle.umd.min.js"></script>
@@ -315,5 +398,32 @@
             });
         });
         
+    </script>
+    <script>
+        const editExamModal = document.getElementById('editExamModal');
+
+        editExamModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+
+            // Get data attributes from clicked button
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const description = button.getAttribute('data-description');
+            const start = button.getAttribute('data-start');
+            const end = button.getAttribute('data-end');
+            const duration = button.getAttribute('data-duration');
+            const numberOfQuestions = button.getAttribute('data-numberOfQuestions');
+            const totalScore = button.getAttribute('data-totalScore');
+
+            // Set values in the modal
+            document.getElementById('editExamId').value = id;
+            document.getElementById('editExamName').value = name;
+            document.getElementById('editExamDescription').value = description;
+            document.getElementById('editStartTime').value = start;
+            document.getElementById('editEndTime').value = end;
+            document.getElementById('editDuration').value = duration;
+            document.getElementById('editNumberOfQuestions').value = numberOfQuestions;
+            document.getElementById('editTotalScore').value = totalScore;
+        });
     </script>
 }

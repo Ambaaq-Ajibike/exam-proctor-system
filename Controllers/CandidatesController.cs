@@ -27,5 +27,13 @@ namespace exam_proctor_system.Controllers
 			TempData["ResponseMessage"] = response.Message;
 			return RedirectToAction("Index");
 		}
+		
+		[HttpPost]
+		public async Task<IActionResult> Update(UpdateCandidateRequest request)
+		{
+			var response = await _candidateService.UpdateCandidateAsync(request);
+			TempData["ResponseMessage"] = response.Message;
+			return RedirectToAction("Index");
+		}
 	}
 }

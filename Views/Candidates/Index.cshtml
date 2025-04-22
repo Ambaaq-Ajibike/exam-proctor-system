@@ -57,24 +57,16 @@
                                     <td>@candidate.Exams</td>
 
                                     <td>
-                                        <span class="dropdown dropstart">
-                                            <a class="btn-icon btn btn-ghost btn-sm rounded-circle" href="admin-course-category.html#" role="button"
-                                               id="courseDropdown1" data-bs-toggle="dropdown" data-bs-offset="-20,20"
-                                               aria-expanded="false">
-                                                <i class="fe fe-more-vertical"></i>
-                                            </a>
-                                            <span class="dropdown-menu" aria-labelledby="courseDropdown1">
-                                                <span class="dropdown-header">Action</span>
-                                                <a class="dropdown-item" href="admin-course-category.html#">
-                                                    <i class="fe fe-send dropdown-item-icon"></i>
-                                                    Edit
-                                                </a>
-                                                <a class="dropdown-item" href="admin-course-category.html#">
-                                                    <i class="fe fe-trash dropdown-item-icon"></i>
-                                                    Delete
-                                                </a>
-                                            </span>
-                                        </span>
+                                        <a class="dropdown-item edit-btn" href="#"
+                                           data-id="@candidate.Id"
+                                           data-firstname="@candidate.FirstName"
+                                           data-lastname="@candidate.LastName"
+                                           data-email="@candidate.Email"
+                                           data-exams='@Html.Raw(Json.Serialize(candidate.Exams))'
+                                           data-bs-toggle="modal" data-bs-target="#editCandidateModal">
+                                            <i class="fe fe-edit dropdown-item-icon"></i> Edit
+                                        </a>
+
                                     </td>
                                 </tr>
                             }
@@ -142,6 +134,48 @@
     </div>
 </div>
 
+
+<div class="modal fade" id="editCandidateModal" tabindex="-1" role="dialog" aria-labelledby="editCandidateLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title mb-0" id="editCandidateLabel">Edit Candidate</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="needs-validation row" id="editCandidateForm" asp-action="Update" method="post">
+                    <input type="hidden" name="Id" id="editCandidateId" />
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label">First name <span class="text-danger">*</span></label>
+                        <input class="form-control" type="text" name="FirstName" id="editFirstName" required />
+                    </div>
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label">Last name <span class="text-danger">*</span></label>
+                        <input class="form-control" type="text" name="LastName" id="editLastName" required />
+                    </div>
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label">Email <span class="text-danger">*</span></label>
+                        <input class="form-control" type="email" name="Email" id="editEmail" required />
+                    </div>
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label">Exams</label>
+                        <select class="form-select" multiple data-choices="" name="ExamIds" id="editExamIds" >
+                            @foreach (var exam in ViewBag.Exams)
+                            {
+                                <option value="@exam.Id">@exam.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts{
     <script src="~/assets/libs/quill/dist/quill.js"></script>
     <script src="~/assets/js/vendors/editor.js"></script>
@@ -149,4 +183,23 @@
     <script src="~/assets/libs/choices.js/public/assets/scripts/choices.min.js"></script>
 
     <script src="~/assets/js/vendors/choice.js"></script>
+
+    <script>
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                document.getElementById('editCandidateId').value = this.dataset.id;
+                document.getElementById('editFirstName').value = this.dataset.firstname;
+                document.getElementById('editLastName').value = this.dataset.lastname;
+                document.getElementById('editEmail').value = this.dataset.email;
+
+                const selectedExams = JSON.parse(this.dataset.exams || '[]');
+                const examSelect = document.getElementById('editExamIds');
+                console.log(examSelect.options, selectedExams, "select")
+                // [...examSelect.options].forEach(opt => {
+                //     opt.selected = selectedExams.includes(parseInt(opt.value));
+                // });
+            });
+        });
+    </script>
+
 }

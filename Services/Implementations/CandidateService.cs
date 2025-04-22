@@ -1,4 +1,5 @@
-﻿using exam_proctor_system.Models.DTos.RequestModel;
+﻿using Azure.Core;
+using exam_proctor_system.Models.DTos.RequestModel;
 using exam_proctor_system.Models.DTos.ResponseModel;
 using exam_proctor_system.Models.Entities;
 using exam_proctor_system.Repositories;
@@ -35,6 +36,7 @@ namespace exam_proctor_system.Services.Implementations
 			};
 			await _candidateRepository.AddAsync(candidate);
 			var exams = new List<Exam>();
+			var candidateExams = new List<CandidateExam>();
 			foreach (var item in request.ExamIds)
 			{
 				var exam = await _examRepository.FindAsync(x => x.Id == item);
@@ -42,15 +44,14 @@ namespace exam_proctor_system.Services.Implementations
 				{
 					continue;
 				}
-				var candidateExam = new CandidateExam
+				candidateExams.Add(new CandidateExam
 				{
-					Exam = exam,
 					ExamId = exam.Id,
-					Candidate = candidate,
-				};
+					CandidateId = candidate.Id,
+				});
 				exams.Add(exam);
-				await _repository.AddAsync(candidateExam);
 			}
+			await _candidateExamRepository.AddRangeAsync(candidateExams);
 			await _repository.SaveChangesAsync();
 			var name = $"{request.FirstName} {request.LastName}";
 			var htmlContent = _emailService.BuildVerificationPasscodeEmail($"{pin}", name, exams);
@@ -91,9 +92,42 @@ namespace exam_proctor_system.Services.Implementations
 			throw new NotImplementedException();
 		}
 
-		public Task<BaseResponse<CandidateModel>> UpdateCandidateAsync(CandidateModel candidateModel)
+		public async Task<BaseResponse<CandidateModel>> UpdateCandidateAsync(UpdateCandidateRequest request)
 		{
-			throw new NotImplementedException();
+			var candidate = await _candidateExamRepository.GetCandidateAsync(x => x.Id == request.Id);
+			candidate.FirstName = request.FirstName;
+			candidate.LastName = request.LastName;
+			candidate.User.Email = request.Email;
+
+			await _candidateExamRepository.RemoveExamsFromCandidate(candidate.CandidateExams);
+			var exams = new List<Exam>();
+			var candidateExams = new List<CandidateExam>();
+			foreach (var item in request.ExamIds)
+			{
+				var exam = await _examRepository.FindAsync(x => x.Id == item);
+				if (exam == null)
+				{
+					continue;
+				}
+				candidateExams.Add(new CandidateExam
+				{
+					ExamId = exam.Id,
+					CandidateId = candidate.Id,
+				});
+				exams.Add(exam);
+			}
+			await _candidateExamRepository.AddRangeAsync(candidateExams);
+			await _candidateRepository.UpdateAsync(candidate);
+			await _repository.SaveChangesAsync();
+			var candidateName = $"{request.FirstName} {request.LastName}";
+			var htmlContent = _emailService.BuildVerificationPasscodeEmail($"{candidate.User.Password}", candidateName, exams);
+			var subject = "SecureExam - Update";
+			await _emailService.SendEmailAsync(request.Email, candidateName, subject, htmlContent);
+			return new BaseResponse<CandidateModel>
+			{
+				IsSuccess = true,
+				Message = "Candidate updated successfully"
+			};
 		}
 	}
 }

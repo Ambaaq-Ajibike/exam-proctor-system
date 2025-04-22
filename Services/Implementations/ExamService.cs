@@ -57,6 +57,77 @@ namespace exam_proctor_system.Services.Implementations
 				Data = exam.Adapt<ExamModel>()
 			};
 		}
+		
+		public async Task<BaseResponse<ExamModel>> UpdateExamAsync(UpdateExamRequestModel request)
+		{
+			var exam = await _candidateExamRepository.GetExamAsync(e => e.Id == request.Id);
+			if (exam == null)
+			{
+				return new BaseResponse<ExamModel>
+				{
+					IsSuccess = false,
+					Message = "Exam not found"
+				};
+			}
+			else if (exam.StartTime <= DateTime.Now)
+			{
+				return new BaseResponse<ExamModel>
+				{
+					IsSuccess = false,
+					Message = "Exam can not be edited after it has started"
+				};
+			}
+			else if (request.StartTime < DateTime.Now)
+			{
+				return new BaseResponse<ExamModel>
+				{
+					IsSuccess = false,
+					Message = "Start time cannot be in the past"
+				};
+			}
+			else if (request.EndTime < request.StartTime)
+			{ 
+				return new BaseResponse<ExamModel>
+				{
+					IsSuccess = false,
+					Message = "End time cannot be before start time"
+				};
+			}
+
+			exam.StartTime = request.StartTime;
+			exam.EndTime = request.EndTime;
+			exam.Duration = request.Duration;
+			exam.TotalScore = request.TotalScore;
+			exam.NumberOfQuestions = request.NumberOfQuestions;
+			exam.Description = request.Description;
+			exam.Name = request.Name;
+
+			await _examRepository.UpdateAsync(exam);
+			if (request.Questions is not null)
+			{
+				await _candidateExamRepository.RemoveQuestionsFromExam(exam.Questions);
+				var (success, message) = await ProcessQuestions(request.Questions, exam.Id);
+				if (!success)
+				{
+					return new BaseResponse<ExamModel>
+					{
+						IsSuccess = false,
+						Message = message
+					};
+				}
+			}
+			
+			await _examRepository.SaveChangesAsync();
+			return new BaseResponse<ExamModel>
+			{
+				IsSuccess = true,
+				Message = "Exam created successfully",
+				Data = exam.Adapt<ExamModel>()
+			};
+		}
+		
+		
+		
 		private async Task<(bool, string)> ProcessQuestions(IFormFile file, Guid examId)
 		{
 			ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -126,14 +197,12 @@ namespace exam_proctor_system.Services.Implementations
 				Status = e.StartTime < DateTime.Now && e.EndTime > DateTime.Now ? "Active" : "Inactive",
 				Progress = e.StartTime > now ? 0 : // Exam not started
 			  e.EndTime <= now ? 100 : // Exam ended
-			  (int)(((now - e.StartTime).TotalMinutes / (e.EndTime - e.StartTime).TotalMinutes) * 100)
+			  (int)(((now - e.StartTime).TotalMinutes / (e.EndTime - e.StartTime).TotalMinutes) * 100),
+				Duration = e.Duration,
+				TotalScore = e.TotalScore,
+				NumberOfQuestions = e.NumberOfQuestions,
 			});
 			return examsResponse;
-		}
-
-		public Task<BaseResponse<ExamModel>> UpdateExamAsync(int id, CreateExamRequestModel request)
-		{
-			throw new NotImplementedException();
 		}
 
 		public async Task<IEnumerable<ExamResponseModel>> GetCandidateExamsByUserId(Guid userId)

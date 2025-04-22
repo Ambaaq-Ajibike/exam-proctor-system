@@ -20,5 +20,7 @@
 		public string Status { get; set; }
 		public int Duration { get; set; }
 		public int Progress { get; set; }
+		public int TotalScore { get; set; }
+		public int NumberOfQuestions { get; set; }
 	}
 }

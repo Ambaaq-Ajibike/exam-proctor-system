@@ -8,7 +8,7 @@ namespace exam_proctor_system.Services.Interfaces
 	{
 		Task<BaseResponse<CandidateModel>> CreateCandidateAsync(CreateCandidateRequest request);
 		Task<BaseResponse<CandidateModel>> GetCandidateByIdAsync(Guid id);
-		Task<BaseResponse<CandidateModel>> UpdateCandidateAsync(CandidateModel candidateModel);
+		Task<BaseResponse<CandidateModel>> UpdateCandidateAsync(UpdateCandidateRequest request);
 		Task<BaseResponse<CandidateModel>> DeleteCandidateAsync(Guid id);
 		Task<IEnumerable<CandidateModel>> GetAllCandidatesAsync();
 	}

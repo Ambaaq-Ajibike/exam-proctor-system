@@ -18,6 +18,14 @@ namespace exam_proctor_system.Controllers
 			TempData["ResponseMessage"] = response.Message;
 			return RedirectToAction("Index");
 		}
+		
+		[HttpPost]
+		public async Task<IActionResult> Update([FromForm]UpdateExamRequestModel updateExamRequest)
+		{
+			var response = await _examService.UpdateExamAsync(updateExamRequest);
+			TempData["ResponseMessage"] = response.Message;
+			return RedirectToAction("Index");
+		}
 
 		[HttpGet]
 		public async Task<IActionResult> QuestionTemplateDownload()

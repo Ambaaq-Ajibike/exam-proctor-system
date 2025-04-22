@@ -9,7 +9,7 @@
 		public int Duration { get; set; }
 		public int TotalScore { get; set; }
 		public int NumberOfQuestions { get; set; }
-		List<Question> Questions { get; set; }
+		public List<Question> Questions { get; set; }
 		public List<CandidateExam> CandidateExams { get; set; } = [];
 	}
 }

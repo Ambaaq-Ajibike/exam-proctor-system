@@ -21,6 +21,10 @@ namespace exam_proctor_system.Repositories
 		{
 			await _context.Set<T>().AddAsync(entity);
 		}
+		public async Task AddRangeAsync(List<T> entity)
+		{
+			await _context.Set<T>().AddRangeAsync(entity);
+		}
 
 		public async Task UpdateAsync(T entity)
 		{

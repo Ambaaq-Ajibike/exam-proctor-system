@@ -9,7 +9,7 @@ namespace exam_proctor_system.Services.Interfaces
 		Task<BaseResponse<ExamModel>> GetExamAsync(int id);
 		Task<IEnumerable<ExamResponseModel>> GetExamsAsync();
 		Task<IEnumerable<ExamResponseModel>> GetCandidateExamsByUserId(Guid userId);
-		Task<BaseResponse<ExamModel>> UpdateExamAsync(int id, CreateExamRequestModel request);
+		Task<BaseResponse<ExamModel>> UpdateExamAsync(UpdateExamRequestModel request);
 		Task<BaseResponse<ExamModel>> DeleteExamAsync(int id);
 	}
 }
