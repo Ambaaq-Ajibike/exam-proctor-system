@@ -2,10 +2,68 @@
 @model BaseResponse<QuizModel>
 @{
     int num = 0;
+    string candidateId = User.Identity.Name;
 }
 @section PageHead {
     <link rel="canonical" href="student-quiz-start.html" />
     <link rel="stylesheet" href="~/assets/libs/bs-stepper/dist/css/bs-stepper.min.css" />
+
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        #camera-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 200px;
+            z-index: 1000;
+            border: 2px solid red;
+            border-radius: 5px;
+            background: black;
+        }
+
+        #camera-feed {
+            width: 100%;
+            height: auto;
+        }
+
+        #fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .exit-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
 }
 
 <div class="db-content" style="margin-left: 5px;">
@@ -29,19 +87,19 @@
                     <!-- Stepper content -->
                     <div class="bs-stepper-content">
                         <div role="tablist">
-                             @for (int i = 1; i <= Model.Data.Questions.Count(); i++)
+                            @for (int i = 1; i <= Model.Data.Questions.Count(); i++)
                             {
                                 <div class="step" data-target="#test-l-@i">
                                     <div class="step-trigger visually-hidden" role="tab" id="courseFormtrigger@(i)" aria-controls="test-l-@i"></div>
                                 </div>
                             }
-                            
+
                         </div>
                         <form asp-action="Result">
                             <input type="hidden" name="ExamId" value="@Model.Data.ExamId" />
                             @for (int i = 0; i < Model.Data.Questions.Count(); i++)
                             {
-                                
+
                                 <div id="test-l-@(i+1)" role="tabpanel" class="bs-stepper-pane fade" aria-labelledby="courseFormtrigger@(i+1)">
                                     <div class="card">
                                         <!-- Card body -->
@@ -129,31 +187,241 @@
     </div>
 </div>
 
+
+<!-- Streaming Components -->
+<div id="camera-container">
+    <video id="camera-feed" autoplay playsinline></video>
+</div>
+
+<div id="fullscreen-overlay">
+    <h2>Exam Instructions</h2>
+    <p>This exam will run in full-screen mode with camera monitoring.</p>
+    <p>You cannot exit until you complete the exam.</p>
+    <p>Please allow camera access when prompted.</p>
+    <button id="start-exam-btn" class="btn btn-primary">Start Exam</button>
+</div>
+
+<div id="exit-warning" class="exit-warning">
+    <h2>Warning!</h2>
+    <p>You are not allowed to exit the exam before completion.</p>
+    <p>Any attempt to exit may result in exam disqualification.</p>
+    <button id="return-to-exam" class="btn btn-primary">Return to Exam</button>
+</div>
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="examToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">System Alert</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toast-message">
+            Could not start exam
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/assets/libs/bs-stepper/dist/js/bs-stepper.min.js"></script>
     <script src="~/assets/js/vendors/beStepper.js"></script>
     <script src="~/assets/js/vendors/navbar-nav.js"></script>
     <script>
-        // Timer Logic
-        const durationInMinutes = @Model.Data.Duration;
-        let timeLeft = durationInMinutes * 60; // Convert minutes to seconds
-        const timerElement = document.getElementById('timer');
+        // Global variables
+        let localStream;
+        let peerConnection;
+        const candidateId = "@candidateId";
+        const examId = "@Model.Data.ExamId";
+        const toast = new bootstrap.Toast(document.getElementById('examToast'));
 
-        function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        // Initialize SignalR connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/streamingHub")
+            .configureLogging(signalR.LogLevel.Warning)
+            .build();
 
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                alert('Time is up!');
-                window.location.href = 'student-quiz-result.html'; // Redirect to results page
-            } else {
-                timeLeft--;
+        // Fullscreen and lockdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const startBtn = document.getElementById('start-exam-btn');
+            const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+            const exitWarning = document.getElementById('exit-warning');
+            const returnToExamBtn = document.getElementById('return-to-exam');
+
+            // Start exam button handler
+            startBtn.addEventListener('click', async function() {
+                try {
+                    // Request fullscreen
+                    await document.documentElement.requestFullscreen();
+
+                    // Initialize streaming
+                    await startWebRTC();
+
+                    // Hide overlay
+                    fullscreenOverlay.style.display = 'none';
+
+                    // Start timer
+                    startTimer();
+
+                    // Setup exit detection
+                    setupExitDetection();
+                } catch (err) {
+                    showToast('Could not start exam: ' + err.message);
+                    console.error('Exam start error:', err);
+                }
+            });
+
+            // Return to exam button handler
+            returnToExamBtn.addEventListener('click', function() {
+                exitWarning.style.display = 'none';
+                document.documentElement.requestFullscreen().catch(e => {});
+            });
+        });
+
+        // Initialize WebRTC streaming
+        async function startWebRTC() {
+            try {
+                // Start SignalR connection
+                await connection.start();
+                await connection.invoke("RegisterAsCandidate", candidateId, examId);
+
+                // Get camera access
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 640, height: 480 },
+                    audio: false
+                });
+                document.getElementById('camera-feed').srcObject = localStream;
+
+                // Setup peer connection
+                setupPeerConnection();
+            } catch (err) {
+                showToast('Streaming setup failed: ' + err.message);
+                console.error('WebRTC error:', err);
             }
         }
 
-        const timerInterval = setInterval(updateTimer, 1000);
-    </script>
+        function setupPeerConnection() {
+            // Create RTCPeerConnection
+            peerConnection = new RTCPeerConnection({
+                iceServers: [
+                    { urls: "stun:stun.l.google.com:19302" },
+                    // Add your TURN servers here if needed
+                ]
+            });
 
+            // Add local stream tracks
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+
+            // ICE Candidate handler
+            peerConnection.onicecandidate = ({ candidate }) => {
+                if (candidate) {
+                    connection.invoke("SendCandidate", "admin", JSON.stringify(candidate));
+                }
+            };
+
+            // Create and send offer
+            peerConnection.createOffer()
+                .then(offer => peerConnection.setLocalDescription(offer))
+                .then(() => {
+                    connection.invoke("SendOffer", "admin", JSON.stringify(peerConnection.localDescription));
+                })
+                .catch(err => {
+                    showToast('Failed to create offer: ' + err.message);
+                    console.error('Offer error:', err);
+                });
+        }
+
+        // Handle incoming answers
+        connection.on("ReceiveAnswer", async answer => {
+            try {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(answer)));
+            } catch (err) {
+                console.error('Answer error:', err);
+            }
+        });
+
+        // Handle incoming ICE candidates
+        connection.on("ReceiveCandidate", async candidate => {
+            try {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
+            } catch (err) {
+                console.error('ICE candidate error:', err);
+            }
+        });
+
+        // Timer function
+        function startTimer() {
+            const durationInMinutes = @Model.Data.Duration;
+            let timeLeft = durationInMinutes * 60;
+            const timerElement = document.getElementById('timer');
+
+            function updateTimer() {
+                const hours = Math.floor(timeLeft / 3600);
+                const minutes = Math.floor((timeLeft % 3600) / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showToast('Time is up! Submitting your exam...');
+                    document.querySelector('form').submit();
+                } else {
+                    timeLeft--;
+                }
+            }
+
+            const timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+        }
+
+        // Detect exit attempts
+        function setupExitDetection() {
+            // Fullscreen change detection
+            document.addEventListener('fullscreenchange', function() {
+                if (!document.fullscreenElement) {
+                    document.getElementById('exit-warning').style.display = 'flex';
+                }
+            });
+
+            // Other exit attempts
+            window.addEventListener('blur', function() {
+                document.getElementById('exit-warning').style.display = 'flex';
+            });
+
+            // Prevent context menu
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+
+            // Prevent keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.altKey || e.metaKey) {
+                    e.preventDefault();
+                }
+
+                if (e.key === 'F5' || e.key === 'F11' ||
+                    (e.ctrlKey && e.key === 'r') ||
+                    (e.metaKey && e.key === 'r')) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // Show toast messages
+        function showToast(message) {
+            document.getElementById('toast-message').textContent = message;
+            toast.show();
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', async () => {
+            if (peerConnection) {
+                peerConnection.close();
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            await connection.stop();
+        });
+    </script>
 }

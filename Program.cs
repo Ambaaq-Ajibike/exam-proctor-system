@@ -3,7 +3,6 @@ using exam_proctor_system.Repositories;
 using exam_proctor_system.Services.Implementations;
 using exam_proctor_system.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +27,14 @@ builder.Services.AddSession(options =>
 {
 	options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
+builder.Services.AddSignalR();
+builder.Services.AddCors(options =>
+{
+	options.AddDefaultPolicy(policy =>
+	{
+		policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+	});
+});
 
 
 
@@ -46,6 +53,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCors();
+
+app.MapHub<StreamingHub>("/streamingHub");
 
 app.UseAuthorization();
 

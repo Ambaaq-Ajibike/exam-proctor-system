@@ -1,0 +1,47 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@section Scripts{
+    <script>
+        const adminConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/streamingHub")
+            .build();
+
+        const peerConnections = {};
+
+        adminConnection.start()
+            .then(() => adminConnection.invoke("RegisterAsAdmin"))
+            .catch(console.error);
+
+        adminConnection.on("NewCandidate", candidateId => {
+            console.log(`New candidate: ${candidateId}`);
+            // Display new candidate UI
+        });
+
+        adminConnection.on("ReceiveOffer", async (candidateId, offer) => {
+            const pc = new RTCPeerConnection({ iceServers: [...] });
+            peerConnections[candidateId] = pc;
+
+            pc.onicecandidate = ({ candidate }) => {
+                if (candidate) {
+                    adminConnection.invoke("SendCandidate", candidateId, JSON.stringify(candidate));
+                }
+            };
+
+            pc.ontrack = (event) => {
+                // Attach stream to video element
+                const video = document.getElementById(`video-${candidateId}`);
+                if (video && !video.srcObject) {
+                    video.srcObject = event.streams[0];
+                }
+            };
+
+            await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer)));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            adminConnection.invoke("SendAnswer", candidateId, JSON.stringify(answer));
+        });
+    </script>
+}
