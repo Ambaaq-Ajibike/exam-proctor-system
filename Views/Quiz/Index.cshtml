@@ -1,7 +1,9 @@
 ﻿@using exam_proctor_system.Models.DTos.ResponseModel
+@inject IHttpContextAccessor HttpContextAccessor
 @model BaseResponse<QuizModel>
 @{
     int num = 0;
+    string candidateId = HttpContextAccessor.HttpContext.Session.GetString("UserId");
 }
 @section PageHead {
     <link rel="canonical" href="student-quiz-start.html" />
@@ -208,57 +210,74 @@
     <script src="~/assets/libs/bs-stepper/dist/js/bs-stepper.min.js"></script>
     <script src="~/assets/js/vendors/beStepper.js"></script>
     <script src="~/assets/js/vendors/navbar-nav.js"></script>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.7/dist/browser/signalr.min.js"></script>
+
     <script>
-        // Fullscreen and lockdown functionality
+        // Consolidated camera and WebRTC management
         document.addEventListener('DOMContentLoaded', function() {
-            // Elements
+            // Shared elements and state
             const startBtn = document.getElementById('start-exam-btn');
             const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-            const exitWarning = document.getElementById('exit-warning');
-            const returnToExamBtn = document.getElementById('return-to-exam');
+            let localStream; // Shared stream reference
 
-            // Start exam button handler
             startBtn.addEventListener('click', async function() {
                 try {
-                    // Request fullscreen
-                    await document.documentElement.requestFullscreen();
+                    // 1. Initialize camera once
+                    localStream = await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: false
+                    });
+                    document.getElementById('camera-feed').srcObject = localStream;
+                    // 2. Start WebRTC streaming after camera init
+                    await initializeWebRTC(localStream);
 
-                    // Initialize camera
-                    await initCamera();
-
-                    // Hide overlay
+                    // 3. UI handling
                     fullscreenOverlay.style.display = 'none';
-
-                    // Start timer
                     startTimer();
-
-                    // Setup exit detection
-                    setupExitDetection();
                 } catch (err) {
-                    alert('Could not start exam: ' + err.message);
+                    alert('Exam initialization failed: ' + err.message);
                 }
-            });
-
-            // Return to exam button handler
-            returnToExamBtn.addEventListener('click', function() {
-                exitWarning.style.display = 'none';
-                document.documentElement.requestFullscreen().catch(e => {});
             });
         });
 
-        // Initialize camera
-        async function initCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: false
-                });
-                document.getElementById('camera-feed').srcObject = stream;
-            } catch (err) {
-                console.error('Camera access error:', err);
-                alert('Camera access is required for this exam. Please enable camera permissions.');
-            }
+        async function initializeWebRTC(stream) {
+            const signalRConnection = new signalR.HubConnectionBuilder()
+                .withUrl('/streamingHub')
+                .build();
+            await signalRConnection.start();
+
+            const pc = new RTCPeerConnection({
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+            });
+
+            // Add existing stream tracks
+            stream.getTracks().forEach(track => pc.addTrack(track, stream));
+            // Offer/answer negotiation
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            await signalRConnection.invoke('SendOffer', "@candidateId", offer);
+
+            signalRConnection.on('ReceiveAnswer', async answer => {
+                await pc.setRemoteDescription(answer);
+            });
+
+            pc.onicecandidate = e => {
+                e.candidate && signalRConnection.invoke(
+                    'SendIceCandidate',
+                    "@candidateId",
+                    e.candidate.toJSON()
+                );
+            };
+
+            signalRConnection.on('ReceiveIceCandidate', candidateInit => {
+                pc.addIceCandidate(new RTCIceCandidate(candidateInit))
+                    .catch(console.error);
+            });
         }
+
+
+
 
         // Timer function (same as before)
         function startTimer() {
@@ -318,5 +337,9 @@
                 }
             });
         }
+
     </script>
 }
+
+
+

@@ -22,5 +22,10 @@ namespace exam_proctor_system.Controllers
 			}
 			return View(result.Data);
 		}
+		[HttpGet]
+		public async Task<IActionResult> Stream()
+		{
+			return View();
+        }
 	}
 }
