@@ -2,12 +2,10 @@
 @model BaseResponse<QuizModel>
 @{
     int num = 0;
-    string candidateId = User.Identity.Name;
 }
 @section PageHead {
     <link rel="canonical" href="student-quiz-start.html" />
     <link rel="stylesheet" href="~/assets/libs/bs-stepper/dist/css/bs-stepper.min.css" />
-
     <style>
         body {
             overflow: hidden;
@@ -187,8 +185,6 @@
     </div>
 </div>
 
-
-<!-- Streaming Components -->
 <div id="camera-container">
     <video id="camera-feed" autoplay playsinline></video>
 </div>
@@ -208,36 +204,11 @@
     <button id="return-to-exam" class="btn btn-primary">Return to Exam</button>
 </div>
 
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="examToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">System Alert</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body" id="toast-message">
-            Could not start exam
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     <script src="~/assets/libs/bs-stepper/dist/js/bs-stepper.min.js"></script>
     <script src="~/assets/js/vendors/beStepper.js"></script>
     <script src="~/assets/js/vendors/navbar-nav.js"></script>
     <script>
-        // Global variables
-        let localStream;
-        let peerConnection;
-        const candidateId = "@candidateId";
-        const examId = "@Model.Data.ExamId";
-        const toast = new bootstrap.Toast(document.getElementById('examToast'));
-
-        // Initialize SignalR connection
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/streamingHub")
-            .configureLogging(signalR.LogLevel.Warning)
-            .build();
-
         // Fullscreen and lockdown functionality
         document.addEventListener('DOMContentLoaded', function() {
             // Elements
@@ -252,8 +223,8 @@
                     // Request fullscreen
                     await document.documentElement.requestFullscreen();
 
-                    // Initialize streaming
-                    await startWebRTC();
+                    // Initialize camera
+                    await initCamera();
 
                     // Hide overlay
                     fullscreenOverlay.style.display = 'none';
@@ -264,8 +235,7 @@
                     // Setup exit detection
                     setupExitDetection();
                 } catch (err) {
-                    showToast('Could not start exam: ' + err.message);
-                    console.error('Exam start error:', err);
+                    alert('Could not start exam: ' + err.message);
                 }
             });
 
@@ -276,80 +246,21 @@
             });
         });
 
-        // Initialize WebRTC streaming
-        async function startWebRTC() {
+        // Initialize camera
+        async function initCamera() {
             try {
-                // Start SignalR connection
-                await connection.start();
-                await connection.invoke("RegisterAsCandidate", candidateId, examId);
-
-                // Get camera access
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480 },
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
                     audio: false
                 });
-                document.getElementById('camera-feed').srcObject = localStream;
-
-                // Setup peer connection
-                setupPeerConnection();
+                document.getElementById('camera-feed').srcObject = stream;
             } catch (err) {
-                showToast('Streaming setup failed: ' + err.message);
-                console.error('WebRTC error:', err);
+                console.error('Camera access error:', err);
+                alert('Camera access is required for this exam. Please enable camera permissions.');
             }
         }
 
-        function setupPeerConnection() {
-            // Create RTCPeerConnection
-            peerConnection = new RTCPeerConnection({
-                iceServers: [
-                    { urls: "stun:stun.l.google.com:19302" },
-                    // Add your TURN servers here if needed
-                ]
-            });
-
-            // Add local stream tracks
-            localStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, localStream);
-            });
-
-            // ICE Candidate handler
-            peerConnection.onicecandidate = ({ candidate }) => {
-                if (candidate) {
-                    connection.invoke("SendCandidate", "admin", JSON.stringify(candidate));
-                }
-            };
-
-            // Create and send offer
-            peerConnection.createOffer()
-                .then(offer => peerConnection.setLocalDescription(offer))
-                .then(() => {
-                    connection.invoke("SendOffer", "admin", JSON.stringify(peerConnection.localDescription));
-                })
-                .catch(err => {
-                    showToast('Failed to create offer: ' + err.message);
-                    console.error('Offer error:', err);
-                });
-        }
-
-        // Handle incoming answers
-        connection.on("ReceiveAnswer", async answer => {
-            try {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(answer)));
-            } catch (err) {
-                console.error('Answer error:', err);
-            }
-        });
-
-        // Handle incoming ICE candidates
-        connection.on("ReceiveCandidate", async candidate => {
-            try {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
-            } catch (err) {
-                console.error('ICE candidate error:', err);
-            }
-        });
-
-        // Timer function
+        // Timer function (same as before)
         function startTimer() {
             const durationInMinutes = @Model.Data.Duration;
             let timeLeft = durationInMinutes * 60;
@@ -363,7 +274,7 @@
 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    showToast('Time is up! Submitting your exam...');
+                    alert('Time is up!');
                     document.querySelector('form').submit();
                 } else {
                     timeLeft--;
@@ -371,7 +282,7 @@
             }
 
             const timerInterval = setInterval(updateTimer, 1000);
-            updateTimer();
+            updateTimer(); // Initial call
         }
 
         // Detect exit attempts
@@ -399,6 +310,7 @@
                     e.preventDefault();
                 }
 
+                // Block F5 and other refresh keys
                 if (e.key === 'F5' || e.key === 'F11' ||
                     (e.ctrlKey && e.key === 'r') ||
                     (e.metaKey && e.key === 'r')) {
@@ -406,22 +318,5 @@
                 }
             });
         }
-
-        // Show toast messages
-        function showToast(message) {
-            document.getElementById('toast-message').textContent = message;
-            toast.show();
-        }
-
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', async () => {
-            if (peerConnection) {
-                peerConnection.close();
-            }
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-            await connection.stop();
-        });
     </script>
 }
