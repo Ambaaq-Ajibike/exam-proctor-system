@@ -212,134 +212,183 @@
     <script src="~/assets/js/vendors/navbar-nav.js"></script>
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.7/dist/browser/signalr.min.js"></script>
-
     <script>
-        // Consolidated camera and WebRTC management
         document.addEventListener('DOMContentLoaded', function() {
-            // Shared elements and state
             const startBtn = document.getElementById('start-exam-btn');
             const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-            let localStream; // Shared stream reference
+            let localStream;
 
             startBtn.addEventListener('click', async function() {
                 try {
-                    // 1. Initialize camera once
                     localStream = await navigator.mediaDevices.getUserMedia({
                         video: true,
                         audio: false
                     });
 
                     document.getElementById('camera-feed').srcObject = localStream;
-                    // 2. Start WebRTC streaming after camera init
                     await initializeWebRTC(localStream);
-
-                    // 3. UI handling
                     fullscreenOverlay.style.display = 'none';
                     startTimer();
+                    // setupExitDetection();
                 } catch (err) {
                     alert('Exam initialization failed: ' + err.message);
                 }
             });
-        });
 
-        async function initializeWebRTC(stream) {
-            const signalRConnection = new signalR.HubConnectionBuilder()
-                .withUrl('/streamingHub')
-                .build();
-            await signalRConnection.start();
-            console.log(stream.getVideoTracks());
-            const pc = new RTCPeerConnection({
-                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-            });
+            async function initializeWebRTC(stream) {
+                try {
+                    const signalRConnection = new signalR.HubConnectionBuilder()
+                        .withUrl('/streamingHub')
+                        .configureLogging(signalR.LogLevel.Information)
+                        .build();
+                    const pc = new RTCPeerConnection({
+                        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                    });
 
-            // Add existing stream tracks
-            stream.getTracks().forEach(track => pc.addTrack(track, stream));
-            // Offer/answer negotiation
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-            await signalRConnection.invoke('SendOffer', "@candidateId", offer);
+                    signalRConnection.onclose(async () => {
+                        console.log('Reconnecting...');
+                        await startConnection();
+                    });
+                    let isRemoteDescriptionSet = false;
+                    const pendingCandidates = [];
+                    signalRConnection.on("ReceiveAnswer", async answer => {
+                        console.log("ReceiveAnswer", answer);
+                        try {
+                            await pc.setRemoteDescription(answer);
+                            console.log('Answer received and processed');
+                            isRemoteDescriptionSet = true;
 
-            signalRConnection.on('ReceiveAnswer', async answer => {
-                await pc.setRemoteDescription(answer);
-            });
-
-            pc.onicecandidate = e => {
-                e.candidate && signalRConnection.invoke(
-                    'SendIceCandidate',
-                    "@candidateId",
-                    e.candidate.toJSON()
-                );
-            };
-
-            signalRConnection.on('ReceiveIceCandidate', candidateInit => {
-                pc.addIceCandidate(new RTCIceCandidate(candidateInit))
-                    .catch(console.error);
-            });
-        }
+                            // Now add all queued candidates
+                            pendingCandidates.forEach(c => pc.addIceCandidate(c)
+                                .catch(err => console.error('Add ICE candidate error (queued):', err)));
+                        } catch (err) {
+                            console.error('Error setting remote description:', err);
+                        }
+                    });
 
 
+                    signalRConnection.on("ReceiveIceCandidate", candidateInit => {
+                        try {
+                            const iceCandidate = new RTCIceCandidate({
+                                candidate: candidateInit.candidate,
+                                sdpMid: candidateInit.sdpMid,
+                                sdpMLineIndex: candidateInit.sdpMLineIndex
+                            });
+                                            console.log("Checking isRemoteDescriptionSet", isRemoteDescriptionSet)
+
+                            if (isRemoteDescriptionSet) {
+                                pc.addIceCandidate(iceCandidate)
+                                    .catch(err => console.error('Add ICE candidate error:', err));
+                            } else {
+                                pendingCandidates.push(iceCandidate);
+                            }
+                        } catch (err) {
+                            console.error('Error creating ICE candidate:', err);
+                            console.log('Problematic candidate data:', candidateInit);
+                        }
+                    });
 
 
-        // Timer function (same as before)
-        function startTimer() {
-            const durationInMinutes = @Model.Data.Duration;
-            let timeLeft = durationInMinutes * 60;
-            const timerElement = document.getElementById('timer');
 
-            function updateTimer() {
-                const hours = Math.floor(timeLeft / 3600);
-                const minutes = Math.floor((timeLeft % 3600) / 60);
-                const seconds = timeLeft % 60;
-                timerElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    async function startConnection() {
+                        try {
+                                    await signalRConnection.start()
+                                    await signalRConnection.invoke("RegisterCandidate", "@candidateId"); 
+                            console.log("SignalR Connected.");
+                        } catch (err) {
+                            console.log(err);
+                            setTimeout(startConnection, 5000);
+                        }
+                    }
 
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    alert('Time is up!');
-                    document.querySelector('form').submit();
-                } else {
-                    timeLeft--;
+                    await startConnection();
+
+                   
+
+                    stream.getTracks().forEach(track => {
+                        pc.addTrack(track, stream);
+                        console.log('Added track:', track.kind);
+                    });
+
+                    pc.onicecandidate = e => {
+                        if (e.candidate) {
+                            const candidateData = {
+                                candidate: e.candidate.candidate,
+                                sdpMid: e.candidate.sdpMid || null,
+                                sdpMLineIndex: e.candidate.sdpMLineIndex
+                            };
+                            
+                            signalRConnection.invoke("SendIceCandidate", "@candidateId", candidateData)
+                                .catch(err => console.error('Send ICE candidate error:', err));
+                        }
+                    };
+
+                    pc.oniceconnectionstatechange = () => {
+                        console.log('ICE connection state:', pc.iceConnectionState);
+                    };
+
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    await signalRConnection.invoke("SendOffer", "@candidateId", offer);
+
+                    
+                } catch (err) {
+                    console.error('WebRTC initialization failed:', err);
+                    alert('WebRTC initialization error: ' + err.message);
                 }
             }
 
-            const timerInterval = setInterval(updateTimer, 1000);
-            updateTimer(); // Initial call
+            function startTimer() {
+    const durationInMinutes = @Model.Data.Duration;
+    let timeLeft = durationInMinutes * 60;
+    const timerElement = document.getElementById('timer');
+
+    function updateTimer() {
+        const hours = Math.floor(timeLeft / 3600);
+        const minutes = Math.floor((timeLeft % 3600) / 60);
+        const seconds = timeLeft % 60;
+        timerElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            alert('Time is up!');
+            document.querySelector('form').submit();
+        } else {
+            timeLeft--;
         }
+    }
 
-        // Detect exit attempts
-        function setupExitDetection() {
-            // Fullscreen change detection
-            document.addEventListener('fullscreenchange', function() {
-                if (!document.fullscreenElement) {
-                    document.getElementById('exit-warning').style.display = 'flex';
-                }
-            });
+    const timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+}
 
-            // Other exit attempts
-            window.addEventListener('blur', function() {
-                document.getElementById('exit-warning').style.display = 'flex';
-            });
-
-            // Prevent context menu
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-            });
-
-            // Prevent keyboard shortcuts
-            document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey || e.altKey || e.metaKey) {
-                    e.preventDefault();
-                }
-
-                // Block F5 and other refresh keys
-                if (e.key === 'F5' || e.key === 'F11' ||
-                    (e.ctrlKey && e.key === 'r') ||
-                    (e.metaKey && e.key === 'r')) {
-                    e.preventDefault();
-                }
-            });
+function setupExitDetection() {
+    document.addEventListener('fullscreenchange', function() {
+        if (!document.fullscreenElement) {
+            document.getElementById('exit-warning').style.display = 'flex';
         }
+    });
 
+    window.addEventListener('blur', function() {
+        document.getElementById('exit-warning').style.display = 'flex';
+    });
+
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey || e.altKey || e.metaKey) {
+            e.preventDefault();
+        }
+        if (e.key === 'F5' || e.key === 'F11' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
+            e.preventDefault();
+        }
+    });
+}
+        });
     </script>
+
 }
 
 

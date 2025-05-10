@@ -1,78 +1,39 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System.Threading.Tasks;
 
 namespace exam_proctor_system.Services.Implementations
 {
-    public class StreamingHub : Hub
-    {
-        // Receiving an offer from a candidate
-        public Task SendOffer(string candidateId, RTCSessionDescriptionInitDto offer)
-            => Clients.Group("Admin")
-                      .SendAsync("ReceiveOffer", candidateId, offer);
+	public class StreamingHub : Hub
+	{
+		private static readonly Dictionary<string, string> CandidateIdToConnection = new();
+		public Task RegisterCandidate(string candidateId)
+		{
+			CandidateIdToConnection[candidateId] = Context.ConnectionId;
+			return Task.CompletedTask;
+		}
+		public async Task SendOffer(string candidateId, object offer)
+		{
+			await Clients.Group("Admin").SendAsync("ReceiveOffer", candidateId, offer);
+		}
 
-        // Receiving an answer back from admin (if you use a distinct DTO)
-        public Task SendAnswer(string candidateId, RTCSessionDescriptionAnswerDto answer)
-            => Clients.Client(candidateId)
-                      .SendAsync("ReceiveAnswer", answer);
+		public async Task SendAnswer(string candidateId, object answer)
+		{
+			if (CandidateIdToConnection.TryGetValue(candidateId, out var connectionId))
+			{
+				await Clients.Client(connectionId).SendAsync("ReceiveAnswer", answer);
+			}
+			await Clients.Client(candidateId).SendAsync("ReceiveAnswer", answer);
+		}
 
-        // Receiving ICE candidates
-        public Task SendIceCandidate(string candidateId, RTCIceCandidateInitDto candidate)
-            => Clients.Group("Admin")
-                      .SendAsync("ReceiveIceCandidate", candidateId, candidate);
-        public override Task OnConnectedAsync()
-        {
-            //if (Context.User.IsInRole("Admin"))
-                Groups.AddToGroupAsync(Context.ConnectionId, "Admin");
-            return base.OnConnectedAsync();
-        }
-    }
-    /// <summary>
-    /// Mirrors the browser’s RTCSessionDescriptionInit dictionary.
-    /// Used to send SDP offers/answers via SignalR.
-    /// </summary>
-    public class RTCSessionDescriptionInitDto
-    {
-        /// <summary>
-        /// The type of the SDP, either "offer" or "answer".
-        /// </summary>
-        public string Type { get; set; }
+		public async Task SendIceCandidate(string candidateId, object candidate)
+		{
+			await Clients.Group("Admin").SendAsync("ReceiveIceCandidate", candidate, candidateId);
+		}
 
-        /// <summary>
-        /// The Session Description Protocol (SDP) blob.
-        /// </summary>
-        public string Sdp { get; set; }
-    }
-
-    /// <summary>
-    /// Identical shape to RTCSessionDescriptionInit —
-    /// useful if you want a semantically distinct class for answers.
-    /// </summary>
-    public class RTCSessionDescriptionAnswerDto
-    {
-        public string Type { get; set; }
-        public string Sdp { get; set; }
-    }
-
-    /// <summary>
-    /// Mirrors the browser’s RTCIceCandidateInit dictionary.
-    /// Used to send ICE candidates via SignalR.
-    /// </summary>
-    public class RTCIceCandidateInitDto
-    {
-        /// <summary>
-        /// The candidate-attribute returned by the ICE server.
-        /// </summary>
-        public string Candidate { get; set; }
-
-        /// <summary>
-        /// The value of the “sdpMid” in the SDP, or null.
-        /// </summary>
-        public string SdpMid { get; set; }
-
-        /// <summary>
-        /// The value of the “sdpMLineIndex” in the SDP, or null.
-        /// </summary>
-        public int? SdpMLineIndex { get; set; }
-    }
-
-
+		public override async Task OnConnectedAsync()
+		{
+			await Groups.AddToGroupAsync(Context.ConnectionId, "Admin");
+			await base.OnConnectedAsync();
+		}
+	}
 }
