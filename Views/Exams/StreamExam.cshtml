@@ -2,14 +2,30 @@
     <style>
         #adminGrid video {
             border: 4px solid lime;
+            width: 100%; /* Make video fill its container */
+            height: auto; /* Maintain aspect ratio */
+            background: #000; /* Black background for letterboxing */
+        }
+
+        .stream-container {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .candidate-label {
+            font-weight: bold;
+            margin-bottom: 5px;
         }
     </style>
 }
 
-
 <div class="container p-4">
     <h2>Live Candidate Streams</h2>
-    <div id="adminGrid" class="grid grid-cols-3 gap-4 mt-4">
+    <div id="adminGrid" class="row">
+        <!-- Videos will be inserted here in 3-column layout -->
     </div>
 </div>
 
@@ -107,24 +123,23 @@
                     });
 
                     function attachStream(candidateId, stream) {
-                        console.log(stream.getVideoTracks(), "getVideoTracks");
                         const video = document.createElement('video');
                         video.autoplay = true;
                         video.playsInline = true;
                         video.srcObject = stream;
                         video.muted = true;
-                        console.log(stream);
-                        const container = document.createElement('div');
-                        container.className = 'stream-container';
-                        container.innerHTML = `<p>Candidate: ${candidateId}</p>`;
-                        container.appendChild(video);
-                        
-                        adminGrid.appendChild(container);
-                        video.onloadedmetadata = () => {
-                          video.play().catch(err => console.error("Video play error:", err));
-                        };
 
-                    }
+                        const container = document.createElement('div');
+                        container.className = 'stream-container col-md-4 col-sm-6 col-12'; // Responsive columns
+                        container.innerHTML = `<div class="candidate-label">Candidate: ${candidateId}</div>`;
+                        container.appendChild(video);
+
+                        adminGrid.appendChild(container);
+
+                        video.onloadedmetadata = () => {
+                            video.play().catch(err => console.error("Video play error:", err));
+                        };
+                }
 
                 } catch (err) {
                     console.error('Initialization error:', err);
