@@ -34,5 +34,9 @@ namespace exam_proctor_system.Controllers
 			var path = Path.Combine(contentRoot, "QuestionsTemplate.xlsx");
 			return File(System.IO.File.OpenRead(path), contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileDownloadName: $"ExamTemplate.xlsx");
 		}
+		public ActionResult StreamExam(Guid examId)
+		{
+			return View(examId);
+		}
 	}
 }

@@ -5,35 +5,57 @@ namespace exam_proctor_system.Services.Implementations
 {
 	public class StreamingHub : Hub
 	{
-		private static readonly Dictionary<string, string> CandidateIdToConnection = new();
-		public Task RegisterCandidate(string candidateId)
+		private static readonly Dictionary<string, string> CandidateConnections = new();
+		private static readonly Dictionary<string, string> CandidateExams = new(); // Track candidate's exam
+
+		public Task RegisterCandidate(string candidateId, string examId)
 		{
-			CandidateIdToConnection[candidateId] = Context.ConnectionId;
+			CandidateConnections[candidateId] = Context.ConnectionId;
+			CandidateExams[candidateId] = examId;
 			return Task.CompletedTask;
 		}
+
 		public async Task SendOffer(string candidateId, object offer)
 		{
-			await Clients.Group("Admin").SendAsync("ReceiveOffer", candidateId, offer);
+			// Send to admin group for this specific exam
+			if (CandidateExams.TryGetValue(candidateId, out var examId))
+			{
+				await Clients.Group($"Admin-{examId}").SendAsync("ReceiveOffer", candidateId, offer);
+			}
 		}
 
 		public async Task SendAnswer(string candidateId, object answer)
 		{
-			if (CandidateIdToConnection.TryGetValue(candidateId, out var connectionId))
+			if (CandidateConnections.TryGetValue(candidateId, out var connectionId))
 			{
 				await Clients.Client(connectionId).SendAsync("ReceiveAnswer", answer);
 			}
-			await Clients.Client(candidateId).SendAsync("ReceiveAnswer", answer);
 		}
 
 		public async Task SendIceCandidate(string candidateId, object candidate)
 		{
-			await Clients.Group("Admin").SendAsync("ReceiveIceCandidate", candidate, candidateId);
+			if (CandidateExams.TryGetValue(candidateId, out var examId))
+			{
+				await Clients.Group($"Admin-{examId}").SendAsync("ReceiveIceCandidate", candidate, candidateId);
+			}
 		}
 
-		public override async Task OnConnectedAsync()
+		public async Task JoinExamAdminGroup(string examId)
 		{
-			await Groups.AddToGroupAsync(Context.ConnectionId, "Admin");
-			await base.OnConnectedAsync();
+			await Groups.AddToGroupAsync(Context.ConnectionId, $"Admin-{examId}");
+		}
+
+		public override async Task OnDisconnectedAsync(Exception? exception)
+		{
+			// Clean up when a candidate disconnects
+			var candidateId = CandidateConnections.FirstOrDefault(x => x.Value == Context.ConnectionId).Key;
+			if (candidateId != null)
+			{
+				CandidateConnections.Remove(candidateId);
+				CandidateExams.Remove(candidateId);
+			}
+
+			await base.OnDisconnectedAsync(exception);
 		}
 	}
 }
