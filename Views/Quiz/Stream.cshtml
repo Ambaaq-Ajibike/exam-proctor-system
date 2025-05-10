@@ -10,18 +10,14 @@
 <div class="container p-4">
     <h2>Live Candidate Streams</h2>
     <div id="adminGrid" class="grid grid-cols-3 gap-4 mt-4">
-        <video id="camera-feed" autoplay playsinline></video>
     </div>
 </div>
 
-
 <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.7/dist/browser/signalr.min.js"></script>
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
       (async () => {
-          
         const connection = new signalR.HubConnectionBuilder()
           .withUrl('/streamingHub')
           .build();
@@ -37,43 +33,59 @@
           });
           peerConnections[candidateId] = pc;
 
-          // 🔑 Explicitly ask to receive video
-          // pc.addTransceiver('video', { direction: 'recvonly' });
+          // Ask to receive video
+          pc.addTransceiver('video', { direction: 'recvonly' });
 
-          // When the remote track arrives, attach it
-
+          // When the remote track arrives:
           pc.ontrack = e => {
-            console.log(e.streams, "streeeeeeeeeeeeeeeeeeeeeeeeee")
-              attachStream(candidateId, e.streams[0])
+            const stream = e.streams[0];
+            attachStream(candidateId, stream);
           };
 
-          // Send our ICE candidates back
+          // ICE candidates back to candidate
           pc.onicecandidate = e => {
             if (e.candidate) {
-              connection.invoke('SendIceCandidate', candidateId, e.candidate.toJSON());
+              connection.invoke('SendIceCandidate',
+                                 candidateId,
+                                 e.candidate.toJSON());
             }
           };
 
-          // Negotiate
+          // Negotiate offer/answer
           await pc.setRemoteDescription(offer);
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
-          connection.invoke('SendAnswer', candidateId, answer);
+          await connection.invoke('SendAnswer', candidateId, answer);
         });
 
-        connection.on('ReceiveIceCandidate', (candidateId, candidateInit) => {
+        // Handle incoming ICE
+        connection.on('ReceiveIceCandidate', (candidateId, init) => {
           const pc = peerConnections[candidateId];
-          if (pc) pc.addIceCandidate(new RTCIceCandidate(candidateInit)).catch(console.error);
+          if (pc) {
+            pc.addIceCandidate(new RTCIceCandidate(init))
+              .catch(console.error);
+          }
         });
 
+        // Create a unique <video> per candidate and attach stream
         function attachStream(id, stream) {
-          let vid = document.getElementById("camera-feed");
-         
-           console.log(vid, stream)
-          vid.srcObject = stream;
+            console.log(stream.getVideoTracks());
+          const vidId = `video-${id}`;
+          let video = document.getElementById(vidId);
+          if (!video) {
+            video = document.createElement('video');
+            video.id        = vidId;
+            video.autoplay  = true;
+            video.playsInline = true;
+            video.muted     = true;               // required for autoplay :contentReference[oaicite:8]{index=8}
+            video.style.width  = '320px';         // ensure visible size :contentReference[oaicite:9]{index=9}
+            video.style.height = '240px';
+            adminGrid.appendChild(video);
+          }
+          console.log('Attaching stream', stream.id, 'to', vidId);
+          video.srcObject = stream;               // bind the live MediaStream :contentReference[oaicite:10]{index=10}
         }
       })();
     });
 </script>
-
 

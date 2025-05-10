@@ -228,6 +228,7 @@
                         video: true,
                         audio: false
                     });
+
                     document.getElementById('camera-feed').srcObject = localStream;
                     // 2. Start WebRTC streaming after camera init
                     await initializeWebRTC(localStream);
@@ -246,7 +247,7 @@
                 .withUrl('/streamingHub')
                 .build();
             await signalRConnection.start();
-
+            console.log(stream.getVideoTracks());
             const pc = new RTCPeerConnection({
                 iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
             });
