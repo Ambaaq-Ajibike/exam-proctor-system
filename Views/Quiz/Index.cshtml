@@ -229,7 +229,7 @@
                     await initializeWebRTC(localStream);
                     fullscreenOverlay.style.display = 'none';
                     startTimer();
-                    // setupExitDetection();
+                    setupExitDetection();
                 } catch (err) {
                     alert('Exam initialization failed: ' + err.message);
                 }
@@ -362,31 +362,80 @@
     updateTimer();
 }
 
-function setupExitDetection() {
-    document.addEventListener('fullscreenchange', function() {
-        if (!document.fullscreenElement) {
-            document.getElementById('exit-warning').style.display = 'flex';
-        }
-    });
+        // Replace your existing setupExitDetection() function with this:
+        function setupExitDetection() {
+            // First enter fullscreen mode
+            async function enterFullscreen() {
+                try {
+                    if (!document.fullscreenElement) {
+                        await document.documentElement.requestFullscreen();
+                    }
+                } catch (err) {
+                    console.error("Fullscreen error:", err);
+                }
+            }
 
-    window.addEventListener('blur', function() {
-        document.getElementById('exit-warning').style.display = 'flex';
-    });
+            // Handle return to exam button
+            document.getElementById('return-to-exam').addEventListener('click', async () => {
+                try {
+                    await enterFullscreen();
+                    document.getElementById('exit-warning').style.display = 'none';
+                } catch (err) {
+                    console.error("Failed to return to fullscreen:", err);
+                }
+            });
 
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-    });
+            // Monitor fullscreen changes
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement) {
+                    document.getElementById('exit-warning').style.display = 'flex';
+                    enterFullscreen().catch(console.error);
+                }
+            });
 
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey || e.altKey || e.metaKey) {
-            e.preventDefault();
+            // Monitor tab/window switches
+            window.addEventListener('blur', () => {
+                document.getElementById('exit-warning').style.display = 'flex';
+            });
+
+            // Prevent context menu
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                return false;
+            });
+
+            // Block keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Block F5, Ctrl+R, Ctrl+Shift+R, etc.
+                if (e.key === 'F5' || e.key === 'F11' ||
+                    (e.ctrlKey && e.key === 'r') ||
+                    (e.metaKey && e.key === 'r') ||
+                    (e.ctrlKey && e.shiftKey && e.key === 'r')) {
+                    e.preventDefault();
+                }
+
+                // Block Alt+Tab, Ctrl+Tab, etc.
+                if (e.altKey || e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                }
+            });
+
+            // Prevent drag/drop
+            document.addEventListener('drop', (e) => {
+                e.preventDefault();
+            });
+            document.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            // Start in fullscreen
+            enterFullscreen();
         }
-        if (e.key === 'F5' || e.key === 'F11' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
-            e.preventDefault();
-        }
-    });
-}
-        });
+  
+
+
+
+});
     </script>
 
 }
