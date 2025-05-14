@@ -2,6 +2,7 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @model BaseResponse<QuizModel>
 @{
+    // Layout = null;
     int num = 0;
     string candidateId = HttpContextAccessor.HttpContext.Session.GetString("UserId");
 }
@@ -65,8 +66,7 @@
         }
     </style>
 }
-
-<div class="db-content" style="margin-left: 5px;">
+<div class="db-content" style="margin-left: 5px; height: 100vh; overflow-y: auto;">
     <div class="container mb-4">
         <div class="row mb-6">
             <div class="col-12">
@@ -184,8 +184,9 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div>
 </div>
+
 
 <div id="camera-container">
     <video id="camera-feed" autoplay playsinline></video>
