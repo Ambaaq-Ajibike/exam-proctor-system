@@ -3,13 +3,12 @@
 @using exam_proctor_system.Models.Entities
 <nav class="navbar-vertical navbar">
     <div class="vh-100" data-simplebar>
+        <!-- Brand logo -->
         <a class="navbar-brand" asp-action="Index">
             <h1 class="display-6 mx-3">SecureExam</h1>
         </a>
-
-        <!-- COLLAPSIBLE NAVIGATION -->
-        <div id="sidebar" class="sidebar bg-dark">
-            <ul class="navbar-nav flex-column">
+        <!-- Navbar nav -->
+        <ul class="navbar-nav flex-column" id="sideNavbar">
             @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == Role.Admin.ToString())
             {
                 <li class="nav-item">
@@ -43,6 +42,5 @@
                 </li>
             }
         </ul>
-        </div>
     </div>
 </nav>

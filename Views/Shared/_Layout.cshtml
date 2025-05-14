@@ -25,28 +25,7 @@
 
     <!-- Theme CSS -->
     <link rel="stylesheet" href="~/assets/css/theme.min.css">
-    <style>
-        body {
-            overflow-x: hidden;
-        }
-        .card{
-            position:static;
-        }
-        .sidebar {
-            width: 250px;
-             height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background-color: #0f172a;
-            padding-top: 6pc; 
-            transition: transform 0.3s ease-in-out;
-        }
 
-            .sidebar.collapsed {
-                transform: translateX(-100%);
-            }
-    </style>
    
 
     @RenderSection("PageHead", required: false)
@@ -101,12 +80,6 @@
                                     </button>
                                 </li>
                             </ul>
-                        </div>
-                        <div>
-                            <!-- Button -->
-                            <button class="navbar-toggler" type="button" id="sidebarToggle">
-                                <span class="navbar-toggler-icon"></span>
-                            </button>
                         </div>
                         <ul class="navbar-nav navbar-right-wrap ms-2 d-flex nav-top-wrap">
 
@@ -188,14 +161,7 @@
     <script src="~/assets/js/vendors/flatpickr.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
-    <script>
-        const toggleBtn = document.getElementById("sidebarToggle");
-        const sidebar = document.getElementById("sidebar");
 
-        toggleBtn.addEventListener("click", function () {
-            sidebar.classList.toggle("collapsed");
-        });
-    </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const toastLiveExample = document.getElementById("liveToast");
